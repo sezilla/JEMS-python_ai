@@ -1,0 +1,11 @@
+numpy
+pandas
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+mysql-connector-python
+python-dotenv
+gunicorn
+requests
+werkzeug==1.0.1

@@ -1,0 +1,25 @@
+# Python-specific
+/venv/bin/*
+/venv/lib/*
+/venv/lib64/*
+/venv/pyvenv.cfg
+/venv/include/*
+/venv/Scripts/*
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Other Python tools
+.pytest_cache/
+/.tox/
+/coverage/
+/htmlcov/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+__pycache__/
+
+
+.vercel
