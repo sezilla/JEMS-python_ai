@@ -21,5 +21,7 @@
 
 __pycache__/
 
+project-history.json
+
 .vercel
 .vercel/cache
