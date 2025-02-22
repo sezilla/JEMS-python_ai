@@ -14,14 +14,13 @@
 /.tox/
 /coverage/
 /htmlcov/
-.mypy_cache/
+/mypy_cache/
 .dmypy.json
 .pyre/
 .pytype/
 
 __pycache__/
 
+# Ignore project history file
 project-history.json
-
-.vercel
-.vercel/cache
+project-history.json
