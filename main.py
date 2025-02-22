@@ -4,6 +4,10 @@ from sqlalchemy import text
 from src.database import get_db
 from src.services.team_allocation import EventTeamAllocator
 from src.schemas import ProjectAllocationRequest
+from src.services.team_allocation import PROJECT_HISTORY_FILE
+import json
+import os
+from datetime import datetime
 import socket
 import requests
 import mysql.connector
@@ -100,6 +104,14 @@ async def tcp_test():
 @app.post("/allocate-teams")
 def allocate_teams(request: ProjectAllocationRequest, db=Depends(get_db)):
     logger.info("Received allocation request: %s", request)
+    
+    # 🔥 Fix: Validate date range before calling `allocate_teams()`
+    start_dt = datetime.strptime(request.start, '%Y-%m-%d')
+    end_dt = datetime.strptime(request.end, '%Y-%m-%d')
+
+    if end_dt < start_dt:
+        return {"success": False, "error": "End date cannot be before the start date."}
+
     try:
         result = allocator.allocate_teams(
             db,
@@ -109,21 +121,30 @@ def allocate_teams(request: ProjectAllocationRequest, db=Depends(get_db)):
             request.end
         )
         logger.info("Allocation result: %s", result)
-        return {"success": True, "data": result}
+        return result  # ✅ Return correct result format
     except Exception as e:
         logger.error("Error during team allocation: %s", str(e))
         return {"success": False, "error": str(e)}
 
+
+@app.get("/allocated-teams/{project_name}")
+def get_allocated_teams(project_name: str):
+    allocated_teams = allocator.allocated_teams.get(project_name, [])
+
+    if not allocated_teams:
+        return {"success": True, "allocated_teams": []}  # ✅ Always return a valid JSON structure
+
+    return {"success": True, "allocated_teams": allocated_teams}
+
 @app.get("/project-history")
 def get_project_history():
     try:
-        history = allocator.project_history
-        if not history:
+        if os.path.exists(PROJECT_HISTORY_FILE):
+            with open(PROJECT_HISTORY_FILE, "r") as file:
+                history = json.load(file)
+            return {"message": "Project history fetched successfully", "data": history}
+        else:
             return {"message": "No project history available"}
-        return {
-            "message": "Project history fetched successfully",
-            "data": history
-        }
     except Exception as e:
         logger.error("Error fetching project history: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Error fetching project history: {str(e)}")

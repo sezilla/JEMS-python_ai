@@ -1,0 +1,17 @@
+[
+    {
+        "success": true,
+        "project_name": "Anthony Schultz",
+        "package_id": 3,
+        "start": "2025-02-22",
+        "end": "2025-02-22",
+        "allocated_teams": [
+            4,
+            7,
+            39,
+            22,
+            30,
+            34
+        ]
+    }
+]
