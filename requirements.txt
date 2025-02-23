@@ -9,3 +9,16 @@ python-dotenv
 gunicorn
 requests
 werkzeug==1.0.1
+torch
+transformers
+datasets
+peft
+bitsandbytes
+accelerate
+
+aiohttp
+
+orjson  # Faster JSON processing (optional)
+
+sentencepiece
+

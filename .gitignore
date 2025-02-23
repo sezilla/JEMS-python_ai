@@ -23,6 +23,8 @@ __pycache__/
 
 # Ignore project history file
 project-history.json
+synthetic_project_dataset.json
+dataset.json
 
 # 📌 ML & Model-related files
 *.pth
@@ -33,5 +35,10 @@ project-history.json
 *.log
 *.pt        # PyTorch model files
 *.bin       # Transformer model weights
-__results__/
-runs/       # Training logs (if using TensorBoard)
+
+# 📌 Data files
+/results/checkpoint-20/*
+/results/checkpoint-40/*
+/results/checkpoint-60/*
+/results/checkpoint-80/*
+/results/checkpoint-100/*
