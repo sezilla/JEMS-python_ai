@@ -23,3 +23,15 @@ __pycache__/
 
 # Ignore project history file
 project-history.json
+
+# 📌 ML & Model-related files
+*.pth
+*.h5
+*.ckpt
+*.onnx
+*.tflite
+*.log
+*.pt        # PyTorch model files
+*.bin       # Transformer model weights
+__results__/
+runs/       # Training logs (if using TensorBoard)
