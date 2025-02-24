@@ -2,9 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.database import get_db
-from src.services.team_allocation import EventTeamAllocator
 from src.schemas import ProjectAllocationRequest
-from src.services.team_allocation import PROJECT_HISTORY_FILE
 import json
 import os
 from datetime import datetime
@@ -14,6 +12,10 @@ import mysql.connector
 from sqlalchemy.exc import OperationalError
 from src.config import DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD
 import logging
+
+from src.services.team_allocation import EventTeamAllocator, PROJECT_HISTORY_FILE
+
+
 
 logging.basicConfig(level=logging.DEBUG)
 

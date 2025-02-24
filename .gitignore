@@ -23,7 +23,7 @@ __pycache__/
 
 # Ignore project history file
 project-history.json
-synthetic_project_dataset.json
+# synthetic_project_dataset.json
 dataset.json
 
 # 📌 ML & Model-related files
