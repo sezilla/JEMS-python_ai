@@ -13,7 +13,7 @@ from transformers import (
 from sklearn.preprocessing import MultiLabelBinarizer
 
 # Load dataset
-DATASET_PATH = "synthetic_project_dataset.json"
+DATASET_PATH = "src/datasets/synthetic_project_dataset.json"
 print("Loading dataset...")
 with open(DATASET_PATH, "r") as f:
     data = json.load(f)

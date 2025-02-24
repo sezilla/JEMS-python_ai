@@ -50,7 +50,7 @@ for _ in range(num_samples):
     dataset.append(project)
 
 # Save updated dataset to JSON
-dataset_path = "datasets\synthetic_project_dataset.json"
+dataset_path = "src\datasets\synthetic_project_dataset.json"
 with open(dataset_path, "w") as f:
     json.dump(dataset, f, indent=4)
 

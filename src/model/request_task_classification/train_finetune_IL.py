@@ -10,8 +10,8 @@ from sklearn.metrics import classification_report, accuracy_score
 import joblib
 import os
 
-DATASET_PATH = 'datasets/task_classification_dataset.json'
-MODEL_PATH = 'classifier/task_classification_model.pkl'
+DATASET_PATH = 'src/datasets/task_classification_dataset.json'
+MODEL_PATH = 'src/classifier/task_classification_model.pkl'
 THRESHOLD = 0.2  # Lowered the minimum probability threshold to 20%
 
 # Load dataset
