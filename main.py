@@ -14,6 +14,7 @@ from src.config import DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USE
 import logging
 
 from src.services.team_allocation import EventTeamAllocator, PROJECT_HISTORY_FILE
+from src.services.spcl_request_classifier import classify_task, HISTORY_PATH
 
 
 
@@ -151,6 +152,21 @@ def get_project_history():
         logger.error("Error fetching project history: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Error fetching project history: {str(e)}")
 
+@app.post("/classify-task")
+def classify_task_endpoint(request: dict):
+    if "task" not in request:
+        raise HTTPException(status_code=400, detail="Missing 'task' in request body")
+    
+    result = classify_task(request["task"])
+    return result
+
+@app.get("/classify-history")
+def classify_history_endpoint():
+    if os.path.exists(HISTORY_PATH):
+        with open(HISTORY_PATH, 'r') as file:
+            history = json.load(file)
+        return history
+    return []
 
 
 
@@ -159,16 +175,6 @@ def get_project_history():
 
 
 
-
-
-
-# from fastapi import FastAPI
-
-# app = FastAPI()
-
-# @app.get("/")
-# async def health_check():
-#     return {"status": "healthy", "message": "Hello World"}
 
 
 

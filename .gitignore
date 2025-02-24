@@ -23,6 +23,9 @@ __pycache__/
 
 # Ignore project history file
 project-history.json
+
+classification_history.json
+task_classification_model.pkl
 # synthetic_project_dataset.json
 dataset.json
 
