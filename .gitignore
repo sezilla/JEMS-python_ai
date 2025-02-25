@@ -49,3 +49,5 @@ dataset.json
 /results/checkpoint-60/*
 /results/checkpoint-80/*
 /results/checkpoint-100/*
+
+.env
