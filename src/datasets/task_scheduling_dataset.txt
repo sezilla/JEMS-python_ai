@@ -1,0 +1,640 @@
+[
+    {
+        "project_name": "Malachi Dale",
+        "start": "2025-02-23",
+        "end": "2026-06-24",
+        "duration": 487,
+        "departments": [
+            {
+                "department_id": 1,
+                "department_name": "Catering",
+                "tasks": [
+                    {
+                        "task_name": "Food planning meeting",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 214, 305 ]  
+                    },
+                    {
+                        "task_name": "Menu planning",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 214, 305 ]
+                    },
+                    {
+                        "task_name": "Food tasting",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Coordinate venue logistics",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Table and chair setup plan",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Finalyze setup plan",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Discuss food cart options",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Buffet setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Reception design setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Food cart setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Service cleanup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 2,
+                "department_name": "Hair and Makeup",
+                "tasks": [
+                    {
+                        "task_name": "Initial makeup consultation",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ] 
+                    },
+                    {
+                        "task_name": "Theme meeting with couple",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Prenup hair and makeup",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Bride airbrush makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Groom traditional makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Entourage makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Pre-ceremony shoot makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 3,
+                "department_name": "Photo and Video",
+                "tasks": [
+                    {
+                        "task_name": "Theme discussion for video/album",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ] 
+                    },
+                    {
+                        "task_name": "Prenuptial pictorial session",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Confirm shot list",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Design photo frame",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Setup photobooth",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Setup drone",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Setup projector screen",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Same-day edit video",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Same-day photo album edit",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Raw photo transfer",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Final file transfer",
+                        "task_category": "6 Months after Wedding Day",
+                        "date_range": [ 487, 667 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 4,
+                "department_name": "Designing",
+                "tasks": [
+                    {
+                        "task_name": "Plan overall theme",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 214, 305 ]  
+                    },
+                    {
+                        "task_name": "Design invitations",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 214, 305 ]
+                    },
+                    {
+                        "task_name": "Aisle, walkway, and altar setup",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Coordinate reception design",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Entourage flowers",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Garden floristry design",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Setup LED wall",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Early decorative setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Final touch-ups",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 5,
+                "department_name": "Entertainment",
+                "tasks": [
+                    {
+                        "task_name": "Reception tone meeting",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Plan reception activities",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Check sound and lights",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Music preference discussion",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Setup lights and sound",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Deploy band",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Coordinate with emcee",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    },
+                    {
+                        "task_name": "Setup reception activities",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 486, 487 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 6,
+                "department_name": "Coordination",
+                "tasks": [
+                    {
+                        "task_name": "Initial meeting",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 122, 305 ]
+                    },
+                    {
+                        "task_name": "Confirm availability",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 122, 305 ]
+                    },
+                    {
+                        "task_name": "Task distribution",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 122, 305 ]
+                    },
+                    {
+                        "task_name": "Memo distribution",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 122, 305 ]
+                    },
+                    {
+                        "task_name": "Monitor departments",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 122, 305 ]
+                    },
+                    {
+                        "task_name": "Finalize event flow",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 305, 397 ]
+                    },
+                    {
+                        "task_name": "Oversee final prep",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 397, 457 ]
+                    },
+                    {
+                        "task_name": "Final check-ins",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 480, 487 ]
+                    },
+                    {
+                        "task_name": "Day-of oversight",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 480, 487 ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "project_name": "Avery Smith",
+        "start": "2024-01-15",
+        "end": "2024-12-31",
+        "duration": 351,
+        "departments": [
+            {
+                "department_id": 1,
+                "department_name": "Catering",
+                "tasks": [
+                    {
+                        "task_name": "Food planning meeting",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 90, 180 ]
+                    },
+                    {
+                        "task_name": "Menu planning",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 90, 180 ]
+                    },
+                    {
+                        "task_name": "Food tasting",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Coordinate venue logistics",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Table and chair setup plan",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Finalize setup plan",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Discuss food cart options",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Buffet setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Reception design setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Food cart setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Service cleanup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 2,
+                "department_name": "Hair and Makeup",
+                "tasks": [
+                    {
+                        "task_name": "Initial makeup consultation",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ] 
+                    },
+                    {
+                        "task_name": "Theme meeting with couple",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Prenup hair and makeup",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Bride airbrush makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Groom traditional makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Entourage makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Pre-ceremony shoot makeup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 3,
+                "department_name": "Photo and Video",
+                "tasks": [
+                    {
+                        "task_name": "Theme discussion for video/album",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ] 
+                    },
+                    {
+                        "task_name": "Prenuptial pictorial session",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Confirm shot list",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Design photo frame",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Setup photobooth",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Setup drone",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Setup projector screen",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Same-day edit video",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Same-day photo album edit",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Raw photo transfer",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Final file transfer",
+                        "task_category": "6 Months after Wedding Day",
+                        "date_range": [ 351, 531 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 4,
+                "department_name": "Designing",
+                "tasks": [
+                    {
+                        "task_name": "Plan overall theme",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 90, 180 ]  
+                    },
+                    {
+                        "task_name": "Design invitations",
+                        "task_category": "9 Months to 6 Months before",
+                        "date_range": [ 90, 180 ]
+                    },
+                    {
+                        "task_name": "Aisle, walkway, and altar setup",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Coordinate reception design",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Entourage flowers",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Garden floristry design",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Setup LED wall",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Early decorative setup",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Final touch-ups",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 5,
+                "department_name": "Entertainment",
+                "tasks": [
+                    {
+                        "task_name": "Reception tone meeting",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Plan reception activities",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Check sound and lights",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Music preference discussion",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Setup lights and sound",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Deploy band",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Coordinate with emcee",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    },
+                    {
+                        "task_name": "Setup reception activities",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 350, 351 ]
+                    }
+                ]
+            },
+            {
+                "department_id": 6,
+                "department_name": "Coordination",
+                "tasks": [
+                    {
+                        "task_name": "Initial meeting",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 30, 180 ]
+                    },
+                    {
+                        "task_name": "Confirm availability",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 30, 180 ]
+                    },
+                    {
+                        "task_name": "Task distribution",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 30, 180 ]
+                    },
+                    {
+                        "task_name": "Memo distribution",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 30, 180 ]
+                    },
+                    {
+                        "task_name": "Monitor departments",
+                        "task_category": "1 Year to 6 Months before",
+                        "date_range": [ 30, 180 ]
+                    },
+                    {
+                        "task_name": "Finalize event flow",
+                        "task_category": "6 Months to 3 Months before",
+                        "date_range": [ 180, 270 ]
+                    },
+                    {
+                        "task_name": "Oversee final prep",
+                        "task_category": "3 Months to 1 Month before",
+                        "date_range": [ 270, 330 ]
+                    },
+                    {
+                        "task_name": "Final check-ins",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 345, 351 ]
+                    },
+                    {
+                        "task_name": "Day-of oversight",
+                        "task_category": "Wedding Day",
+                        "date_range": [ 345, 351 ]
+                    }
+                ]
+            }
+        ]
+    }
+]

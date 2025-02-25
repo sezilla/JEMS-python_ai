@@ -15,6 +15,7 @@ import logging
 
 from src.services.team_allocation import EventTeamAllocator, PROJECT_HISTORY_FILE
 from src.services.spcl_request_classifier import classify_task, HISTORY_PATH
+from src.services.task_scheduler import predict_categories, PredictRequest
 
 
 
@@ -168,6 +169,15 @@ def classify_history_endpoint():
         return history
     return []
 
+@app.post("/predict_categories")
+def predict_endpoint(request: PredictRequest):
+    return predict_categories(request.project_name, request.start, request.end)
+
+
+
+
+
+
 
 
 
@@ -187,4 +197,3 @@ def classify_history_endpoint():
 # │   │   ├── team_allocation.py
 # ├── main.py
 # ├── requirements.txt
-# ├── vercel.json

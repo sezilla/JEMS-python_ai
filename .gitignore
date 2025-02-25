@@ -26,6 +26,10 @@ project-history.json
 
 classification_history.json
 task_classification_model.pkl
+
+label_encoder.pkl
+task_scheduling_classifier.pkl
+
 # synthetic_project_dataset.json
 dataset.json
 
