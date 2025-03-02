@@ -66,7 +66,7 @@ class PredictRequest(BaseModel):
     end: str
 
 # Example test
-# test_project_name = "Test Project"
-# test_start = "2023-01-01"
-# test_end = "2023-12-31"  # A full-year project
-# predicted_results = predict_categories(test_project_name, test_start, test_end)
+test_project_name = "Test Project"
+test_start = "2023-01-01"
+test_end = "2023-12-31"  # A full-year project
+predicted_results = predict_categories(test_project_name, test_start, test_end)

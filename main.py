@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 allocator = EventTeamAllocator()
 
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="127.0.0.1", port=3000, reload=True)
+
 
 @app.get("/")
 async def health_check():
@@ -40,28 +40,6 @@ async def startup_event():
     logger.info(f"DB_PORT: {DATABASE_PORT}")
     logger.info(f"DB_NAME: {DATABASE_NAME}")
     logger.info(f"DB_USER: {DATABASE_USER}")
-    
-@app.get("/debug")
-async def debug_connection():
-    try:
-        # Attempting to connect to the database using mysql.connector
-        connection = mysql.connector.connect(
-            host=DATABASE_HOST,
-            user=DATABASE_USER,
-            password=DATABASE_PASSWORD,
-            database=DATABASE_NAME,
-            port=DATABASE_PORT,
-            connection_timeout=5
-        )
-        connection.close()
-        logger.info(f"Successfully connected to the database at {DATABASE_HOST}")
-        return {"message": f"Successfully connected to the database at {DATABASE_HOST}"}
-    except mysql.connector.Error as e:
-        logger.error(f"Database connection failed: {e}")
-        return {"error": f"Database connection failed: {str(e)}"}
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        return {"error": f"Unexpected error: {str(e)}"}
 
 @app.get("/test")
 async def network_test():
@@ -80,27 +58,6 @@ async def network_test():
     except mysql.connector.Error as e:
         logger.error(f"MySQL Error: {e}")
         return {"error": f"Could not reach MySQL server: {str(e)}"}
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        return {"error": f"Unexpected error: {str(e)}"}
-
-@app.get("/tcp-test")
-async def tcp_test():
-    try:
-        # Directly attempt a TCP connection to the database on port 3306
-        connection = mysql.connector.connect(
-            host=DATABASE_HOST,
-            user=DATABASE_USER,
-            password=DATABASE_PASSWORD,
-            database=DATABASE_NAME,
-            port=DATABASE_PORT,
-            connection_timeout=5
-        )
-        connection.close()
-        return {"message": f"TCP connection to {DATABASE_HOST}:{DATABASE_PORT} successful"}
-    except mysql.connector.Error as e:
-        logger.error(f"TCP Connection Error: {e}")
-        return {"error": f"TCP connection failed: {str(e)}"}
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         return {"error": f"Unexpected error: {str(e)}"}
@@ -172,13 +129,6 @@ def classify_history_endpoint():
 @app.post("/predict_categories")
 def predict_endpoint(request: PredictRequest):
     return predict_categories(request.project_name, request.start, request.end)
-
-
-
-
-
-
-
 
 
 
