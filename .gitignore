@@ -6,6 +6,13 @@
 /venv/include/*
 /venv/Scripts/*
 
+/.venv/bin/*
+/.venv/lib/*
+/.venv/lib64/*
+/.venv/pyvenv.cfg
+/.venv/include/*
+/.venv/Scripts/*
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
@@ -22,13 +29,16 @@
 __pycache__/
 
 # Ignore project history file
+
+/src/classifier/*
+
 project-history.json
 
-classification_history.json
-task_classification_model.pkl
+# classification_history.json
+# task_classification_model.pkl
 
-label_encoder.pkl
-task_scheduling_classifier.pkl
+# label_encoder.pkl
+# task_scheduling_classifier.pkl
 
 # synthetic_project_dataset.json
 dataset.json
