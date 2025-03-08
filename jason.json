@@ -1,0 +1,28 @@
+[
+    {
+        "Designing": {
+            "task": "Capture every special moment with high-quality photography and videography, including a pre-wedding shoot and candid guest interactions.",
+            "confidence": "36.53%"
+        },
+        "Catering": {
+            "task": "Serve a carefully curated multi-course meal featuring the couple\u2019s favorite cuisines, paired with signature cocktails and a decadent dessert station.",
+            "confidence": "34.54%"
+        },
+        "Entertainment": {
+            "task": "Arrange a live band for the ceremony and dinner, followed by a DJ playing an energetic mix of music to keep guests dancing all night.",
+            "confidence": "73.58%"
+        },
+        "Photo and Video": {
+            "task": "Capture every special moment with high-quality photography and videography, including a pre-wedding shoot and candid guest interactions.",
+            "confidence": "51.12%"
+        },
+        "Coordination": {
+            "task": "Provide professional hair and makeup services for the couple and wedding party, ensuring everyone looks flawless for the big day.",
+            "confidence": "33.14%"
+        },
+        "Hair and Makeup": {
+            "task": "Provide professional hair and makeup services for the couple and wedding party, ensuring everyone looks flawless for the big day.",
+            "confidence": "51.33%"
+        }
+    }
+]

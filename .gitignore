@@ -30,9 +30,12 @@ __pycache__/
 
 # Ignore project history file
 
-/src/classifier/*
+/src/classifier/baseModel/JEMS_team_allocator/
+/src/classifier/runningModels/
 
-project-history.json
+# /src/classifier/*
+
+# project-history.json
 
 # classification_history.json
 # task_classification_model.pkl

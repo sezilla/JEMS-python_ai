@@ -1,0 +1,18 @@
+[
+    {
+        "task": "Create a beautifully decorated garden setting with fresh flowers, soft lighting, and elegant seating.",
+        "department": [
+            {
+                "Designing": "Curate floral arrangements and garden-themed decor."
+            }
+        ]
+    },
+    {
+        "task": "Also, arrange a string quartet for the ceremony and hire a photographer to capture the event.",
+        "department": [
+            {
+                "Photo and Video": "Organize professional photography and videography services."
+            }
+        ]
+    }
+]
