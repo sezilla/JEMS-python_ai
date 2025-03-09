@@ -32,6 +32,7 @@ __pycache__/
 
 /src/classifier/baseModel/JEMS_team_allocator/
 /src/classifier/runningModels/
+/src/classifier/history/
 
 # /src/classifier/*
 
