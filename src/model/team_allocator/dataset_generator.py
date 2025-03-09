@@ -15,7 +15,7 @@ department_teams = {
 }
 
 package_departments = {
-    1: [1, 2, 3, 4, 5],                 # Basic Package
+    1: [1, 2, 4, 5, 6],                 # Basic Package
     2: [1, 2, 3, 4, 5, 6],              # Standard Package
     3: [1, 2, 3, 4, 5, 6],              # Premium Package
     4: [1, 2, 3, 4, 5, 6],              # Luxury Package

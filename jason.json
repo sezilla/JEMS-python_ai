@@ -1,28 +1,92 @@
 [
     {
-        "Designing": {
-            "task": "Capture every special moment with high-quality photography and videography, including a pre-wedding shoot and candid guest interactions.",
-            "confidence": "36.53%"
-        },
-        "Catering": {
-            "task": "Serve a carefully curated multi-course meal featuring the couple\u2019s favorite cuisines, paired with signature cocktails and a decadent dessert station.",
-            "confidence": "34.54%"
-        },
-        "Entertainment": {
-            "task": "Arrange a live band for the ceremony and dinner, followed by a DJ playing an energetic mix of music to keep guests dancing all night.",
-            "confidence": "73.58%"
-        },
-        "Photo and Video": {
-            "task": "Capture every special moment with high-quality photography and videography, including a pre-wedding shoot and candid guest interactions.",
-            "confidence": "51.12%"
-        },
-        "Coordination": {
-            "task": "Provide professional hair and makeup services for the couple and wedding party, ensuring everyone looks flawless for the big day.",
-            "confidence": "33.14%"
-        },
-        "Hair and Makeup": {
-            "task": "Provide professional hair and makeup services for the couple and wedding party, ensuring everyone looks flawless for the big day.",
-            "confidence": "51.33%"
-        }
+        "project_id": 1,
+        "status": "success",
+        "package_id": 5,
+        "start": "2019-02-21",
+        "end": "2020-02-16",
+        "allocated_teams": [
+            1,
+            7,
+            13,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 2,
+        "status": "success",
+        "package_id": 3,
+        "start": "2019-02-15",
+        "end": "2020-02-18",
+        "allocated_teams": [
+            2,
+            8,
+            14,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 3,
+        "status": "success",
+        "package_id": 4,
+        "start": "2019-01-30",
+        "end": "2020-02-20",
+        "allocated_teams": [
+            3,
+            9,
+            15,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 4,
+        "status": "success",
+        "package_id": 3,
+        "start": "2019-07-21",
+        "end": "2020-02-20",
+        "allocated_teams": [
+            4,
+            10,
+            16,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 5,
+        "status": "success",
+        "package_id": 2,
+        "start": "2019-03-02",
+        "end": "2020-02-22",
+        "allocated_teams": [
+            5,
+            11,
+            17,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 6,
+        "status": "success",
+        "package_id": 1,
+        "start": "2019-05-17",
+        "end": "2020-02-23",
+        "allocated_teams": [
+            6,
+            12,
+            18,
+            24,
+            30,
+            36
+        ]
     }
 ]
