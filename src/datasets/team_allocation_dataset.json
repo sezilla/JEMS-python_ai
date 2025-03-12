@@ -1,0 +1,2205 @@
+[
+    {
+        "project_id": 1,
+        "package_id": 4,
+        "start": "2023-12-20",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            13,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 2,
+        "package_id": 2,
+        "start": "2023-02-25",
+        "end": "2023-09-28",
+        "allocated_teams": [
+            2,
+            8,
+            14,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 3,
+        "package_id": 5,
+        "start": "2023-08-27",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            15,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 4,
+        "package_id": 1,
+        "start": "2023-02-02",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            4,
+            10,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 5,
+        "package_id": 3,
+        "start": "2022-11-12",
+        "end": "2023-12-13",
+        "allocated_teams": [
+            5,
+            11,
+            16,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 6,
+        "package_id": 1,
+        "start": "2020-12-16",
+        "end": "2022-02-10",
+        "allocated_teams": [
+            6,
+            12,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 7,
+        "package_id": 1,
+        "start": "2020-02-15",
+        "end": "2020-09-17",
+        "allocated_teams": [
+            1,
+            7,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 8,
+        "package_id": 1,
+        "start": "2022-05-11",
+        "end": "2023-01-18",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 9,
+        "package_id": 3,
+        "start": "2023-07-15",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            17,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 10,
+        "package_id": 4,
+        "start": "2023-07-04",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            4,
+            10,
+            18,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 11,
+        "package_id": 5,
+        "start": "2021-09-04",
+        "end": "2022-05-13",
+        "allocated_teams": [
+            5,
+            11,
+            13,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 12,
+        "package_id": 1,
+        "start": "2022-06-06",
+        "end": "2023-07-16",
+        "allocated_teams": [
+            6,
+            12,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 13,
+        "package_id": 4,
+        "start": "2023-12-02",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            14,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 14,
+        "package_id": 4,
+        "start": "2023-08-16",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            2,
+            8,
+            15,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 15,
+        "package_id": 4,
+        "start": "2020-10-19",
+        "end": "2021-04-26",
+        "allocated_teams": [
+            3,
+            9,
+            16,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 16,
+        "package_id": 4,
+        "start": "2022-03-17",
+        "end": "2022-11-03",
+        "allocated_teams": [
+            4,
+            10,
+            17,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 17,
+        "package_id": 3,
+        "start": "2022-10-28",
+        "end": "2023-12-17",
+        "allocated_teams": [
+            5,
+            11,
+            18,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 18,
+        "package_id": 3,
+        "start": "2020-04-29",
+        "end": "2020-11-23",
+        "allocated_teams": [
+            6,
+            12,
+            13,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 19,
+        "package_id": 3,
+        "start": "2022-05-30",
+        "end": "2023-06-25",
+        "allocated_teams": [
+            1,
+            7,
+            14,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 20,
+        "package_id": 1,
+        "start": "2020-12-19",
+        "end": "2022-05-31",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 21,
+        "package_id": 2,
+        "start": "2023-06-29",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            15,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 22,
+        "package_id": 2,
+        "start": "2021-10-30",
+        "end": "2022-10-21",
+        "allocated_teams": [
+            4,
+            10,
+            16,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 23,
+        "package_id": 5,
+        "start": "2023-04-16",
+        "end": "2023-11-12",
+        "allocated_teams": [
+            5,
+            11,
+            17,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 24,
+        "package_id": 3,
+        "start": "2020-09-11",
+        "end": "2021-05-25",
+        "allocated_teams": [
+            6,
+            12,
+            18,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 25,
+        "package_id": 5,
+        "start": "2021-11-11",
+        "end": "2022-10-22",
+        "allocated_teams": [
+            1,
+            7,
+            13,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 26,
+        "package_id": 1,
+        "start": "2021-05-16",
+        "end": "2022-05-21",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 27,
+        "package_id": 2,
+        "start": "2020-01-11",
+        "end": "2020-09-24",
+        "allocated_teams": [
+            3,
+            9,
+            14,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 28,
+        "package_id": 2,
+        "start": "2022-09-18",
+        "end": "2023-08-27",
+        "allocated_teams": [
+            4,
+            10,
+            15,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 29,
+        "package_id": 2,
+        "start": "2020-04-29",
+        "end": "2021-07-14",
+        "allocated_teams": [
+            5,
+            11,
+            16,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 30,
+        "package_id": 3,
+        "start": "2023-06-17",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            6,
+            12,
+            17,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 31,
+        "package_id": 4,
+        "start": "2022-05-12",
+        "end": "2023-05-10",
+        "allocated_teams": [
+            1,
+            7,
+            18,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 32,
+        "package_id": 4,
+        "start": "2020-02-25",
+        "end": "2020-09-03",
+        "allocated_teams": [
+            2,
+            8,
+            13,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 33,
+        "package_id": 1,
+        "start": "2020-04-27",
+        "end": "2020-12-13",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 34,
+        "package_id": 2,
+        "start": "2023-11-01",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            4,
+            10,
+            14,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 35,
+        "package_id": 1,
+        "start": "2023-01-26",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 36,
+        "package_id": 3,
+        "start": "2023-07-14",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            6,
+            12,
+            15,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 37,
+        "package_id": 2,
+        "start": "2023-06-09",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            16,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 38,
+        "package_id": 4,
+        "start": "2021-04-25",
+        "end": "2022-07-03",
+        "allocated_teams": [
+            2,
+            8,
+            17,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 39,
+        "package_id": 4,
+        "start": "2022-09-07",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            18,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 40,
+        "package_id": 3,
+        "start": "2022-05-14",
+        "end": "2023-10-27",
+        "allocated_teams": [
+            4,
+            10,
+            13,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 41,
+        "package_id": 1,
+        "start": "2022-10-27",
+        "end": "2023-12-09",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 42,
+        "package_id": 1,
+        "start": "2022-03-27",
+        "end": "2023-08-21",
+        "allocated_teams": [
+            6,
+            12,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 43,
+        "package_id": 3,
+        "start": "2022-11-03",
+        "end": "2023-09-09",
+        "allocated_teams": [
+            1,
+            7,
+            14,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 44,
+        "package_id": 3,
+        "start": "2021-06-20",
+        "end": "2022-02-28",
+        "allocated_teams": [
+            2,
+            8,
+            15,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 45,
+        "package_id": 4,
+        "start": "2021-05-30",
+        "end": "2022-03-03",
+        "allocated_teams": [
+            3,
+            9,
+            16,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 46,
+        "package_id": 2,
+        "start": "2020-05-03",
+        "end": "2021-05-21",
+        "allocated_teams": [
+            4,
+            10,
+            17,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 47,
+        "package_id": 3,
+        "start": "2021-02-18",
+        "end": "2022-02-21",
+        "allocated_teams": [
+            5,
+            11,
+            18,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 48,
+        "package_id": 4,
+        "start": "2020-10-10",
+        "end": "2022-02-16",
+        "allocated_teams": [
+            6,
+            12,
+            13,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 49,
+        "package_id": 4,
+        "start": "2022-11-11",
+        "end": "2023-09-11",
+        "allocated_teams": [
+            1,
+            7,
+            14,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 50,
+        "package_id": 2,
+        "start": "2021-02-14",
+        "end": "2021-10-04",
+        "allocated_teams": [
+            2,
+            8,
+            15,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 51,
+        "package_id": 3,
+        "start": "2023-10-29",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            16,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 52,
+        "package_id": 1,
+        "start": "2020-02-10",
+        "end": "2020-10-25",
+        "allocated_teams": [
+            4,
+            10,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 53,
+        "package_id": 5,
+        "start": "2023-01-31",
+        "end": "2023-12-01",
+        "allocated_teams": [
+            5,
+            11,
+            17,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 54,
+        "package_id": 1,
+        "start": "2021-10-17",
+        "end": "2022-09-20",
+        "allocated_teams": [
+            6,
+            12,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 55,
+        "package_id": 4,
+        "start": "2021-11-09",
+        "end": "2023-01-18",
+        "allocated_teams": [
+            1,
+            7,
+            18,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 56,
+        "package_id": 3,
+        "start": "2021-12-04",
+        "end": "2023-04-19",
+        "allocated_teams": [
+            2,
+            8,
+            13,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 57,
+        "package_id": 1,
+        "start": "2021-05-06",
+        "end": "2022-06-05",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 58,
+        "package_id": 4,
+        "start": "2022-01-17",
+        "end": "2023-02-07",
+        "allocated_teams": [
+            4,
+            10,
+            14,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 59,
+        "package_id": 3,
+        "start": "2023-11-03",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            5,
+            11,
+            15,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 60,
+        "package_id": 3,
+        "start": "2023-02-19",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            6,
+            12,
+            16,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 61,
+        "package_id": 5,
+        "start": "2023-01-11",
+        "end": "2023-08-28",
+        "allocated_teams": [
+            1,
+            7,
+            17,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 62,
+        "package_id": 2,
+        "start": "2022-06-17",
+        "end": "2023-01-11",
+        "allocated_teams": [
+            2,
+            8,
+            18,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 63,
+        "package_id": 4,
+        "start": "2023-09-14",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            13,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 64,
+        "package_id": 4,
+        "start": "2021-04-16",
+        "end": "2021-10-22",
+        "allocated_teams": [
+            4,
+            10,
+            14,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 65,
+        "package_id": 1,
+        "start": "2023-09-24",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 66,
+        "package_id": 4,
+        "start": "2023-12-20",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            6,
+            12,
+            15,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 67,
+        "package_id": 5,
+        "start": "2020-07-31",
+        "end": "2021-12-09",
+        "allocated_teams": [
+            1,
+            7,
+            16,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 68,
+        "package_id": 5,
+        "start": "2022-05-07",
+        "end": "2022-11-05",
+        "allocated_teams": [
+            2,
+            8,
+            17,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 69,
+        "package_id": 5,
+        "start": "2023-02-28",
+        "end": "2023-12-08",
+        "allocated_teams": [
+            3,
+            9,
+            18,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 70,
+        "package_id": 4,
+        "start": "2022-06-05",
+        "end": "2023-01-17",
+        "allocated_teams": [
+            4,
+            10,
+            13,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 71,
+        "package_id": 4,
+        "start": "2020-05-30",
+        "end": "2020-12-25",
+        "allocated_teams": [
+            5,
+            11,
+            14,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 72,
+        "package_id": 2,
+        "start": "2021-03-15",
+        "end": "2022-03-20",
+        "allocated_teams": [
+            6,
+            12,
+            15,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 73,
+        "package_id": 3,
+        "start": "2023-12-03",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            16,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 74,
+        "package_id": 4,
+        "start": "2020-02-09",
+        "end": "2020-08-15",
+        "allocated_teams": [
+            2,
+            8,
+            17,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 75,
+        "package_id": 3,
+        "start": "2020-04-11",
+        "end": "2020-12-25",
+        "allocated_teams": [
+            3,
+            9,
+            18,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 76,
+        "package_id": 1,
+        "start": "2023-08-25",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            4,
+            10,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 77,
+        "package_id": 4,
+        "start": "2022-09-14",
+        "end": "2023-12-05",
+        "allocated_teams": [
+            5,
+            11,
+            13,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 78,
+        "package_id": 2,
+        "start": "2020-08-26",
+        "end": "2021-03-24",
+        "allocated_teams": [
+            6,
+            12,
+            14,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 79,
+        "package_id": 5,
+        "start": "2023-11-21",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            15,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 80,
+        "package_id": 1,
+        "start": "2020-05-11",
+        "end": "2021-06-10",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 81,
+        "package_id": 3,
+        "start": "2020-09-21",
+        "end": "2022-01-12",
+        "allocated_teams": [
+            3,
+            9,
+            16,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 82,
+        "package_id": 3,
+        "start": "2020-10-30",
+        "end": "2022-03-14",
+        "allocated_teams": [
+            4,
+            10,
+            17,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 83,
+        "package_id": 1,
+        "start": "2020-09-25",
+        "end": "2021-11-03",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 84,
+        "package_id": 4,
+        "start": "2022-08-31",
+        "end": "2023-12-07",
+        "allocated_teams": [
+            6,
+            12,
+            18,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 85,
+        "package_id": 2,
+        "start": "2022-03-25",
+        "end": "2023-05-25",
+        "allocated_teams": [
+            1,
+            7,
+            13,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 86,
+        "package_id": 3,
+        "start": "2022-06-06",
+        "end": "2023-07-30",
+        "allocated_teams": [
+            2,
+            8,
+            14,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 87,
+        "package_id": 1,
+        "start": "2020-06-02",
+        "end": "2021-01-15",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 88,
+        "package_id": 1,
+        "start": "2021-05-19",
+        "end": "2022-07-22",
+        "allocated_teams": [
+            4,
+            10,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 89,
+        "package_id": 5,
+        "start": "2023-12-02",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            5,
+            11,
+            15,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 90,
+        "package_id": 4,
+        "start": "2020-12-17",
+        "end": "2021-08-24",
+        "allocated_teams": [
+            6,
+            12,
+            16,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 91,
+        "package_id": 2,
+        "start": "2020-01-06",
+        "end": "2020-07-13",
+        "allocated_teams": [
+            1,
+            7,
+            17,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 92,
+        "package_id": 1,
+        "start": "2023-02-14",
+        "end": "2023-08-26",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 93,
+        "package_id": 1,
+        "start": "2021-03-09",
+        "end": "2022-04-28",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 94,
+        "package_id": 2,
+        "start": "2022-06-28",
+        "end": "2023-08-24",
+        "allocated_teams": [
+            4,
+            10,
+            18,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 95,
+        "package_id": 1,
+        "start": "2022-01-18",
+        "end": "2023-04-24",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 96,
+        "package_id": 3,
+        "start": "2022-01-10",
+        "end": "2023-02-18",
+        "allocated_teams": [
+            6,
+            12,
+            13,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 97,
+        "package_id": 1,
+        "start": "2021-08-04",
+        "end": "2022-08-07",
+        "allocated_teams": [
+            1,
+            7,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 98,
+        "package_id": 1,
+        "start": "2023-02-20",
+        "end": "2023-11-19",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 99,
+        "package_id": 5,
+        "start": "2020-01-02",
+        "end": "2020-09-09",
+        "allocated_teams": [
+            3,
+            9,
+            14,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 100,
+        "package_id": 2,
+        "start": "2021-02-16",
+        "end": "2021-11-13",
+        "allocated_teams": [
+            4,
+            10,
+            15,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 101,
+        "package_id": 3,
+        "start": "2022-01-28",
+        "end": "2023-03-22",
+        "allocated_teams": [
+            5,
+            11,
+            16,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 102,
+        "package_id": 5,
+        "start": "2021-08-17",
+        "end": "2022-06-17",
+        "allocated_teams": [
+            6,
+            12,
+            17,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 103,
+        "package_id": 5,
+        "start": "2020-07-07",
+        "end": "2021-11-13",
+        "allocated_teams": [
+            1,
+            7,
+            18,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 104,
+        "package_id": 1,
+        "start": "2023-10-24",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 105,
+        "package_id": 4,
+        "start": "2020-05-03",
+        "end": "2021-01-19",
+        "allocated_teams": [
+            3,
+            9,
+            13,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 106,
+        "package_id": 3,
+        "start": "2021-02-27",
+        "end": "2021-09-18",
+        "allocated_teams": [
+            4,
+            10,
+            14,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 107,
+        "package_id": 3,
+        "start": "2020-05-26",
+        "end": "2021-01-13",
+        "allocated_teams": [
+            5,
+            11,
+            15,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 108,
+        "package_id": 1,
+        "start": "2021-09-08",
+        "end": "2022-10-15",
+        "allocated_teams": [
+            6,
+            12,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 109,
+        "package_id": 5,
+        "start": "2020-08-11",
+        "end": "2021-08-08",
+        "allocated_teams": [
+            1,
+            7,
+            16,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 110,
+        "package_id": 5,
+        "start": "2023-03-20",
+        "end": "2023-09-26",
+        "allocated_teams": [
+            2,
+            8,
+            17,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 111,
+        "package_id": 1,
+        "start": "2020-01-03",
+        "end": "2020-09-27",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 112,
+        "package_id": 2,
+        "start": "2020-10-07",
+        "end": "2021-12-18",
+        "allocated_teams": [
+            4,
+            10,
+            18,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 113,
+        "package_id": 1,
+        "start": "2021-03-25",
+        "end": "2022-08-19",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 114,
+        "package_id": 3,
+        "start": "2022-05-08",
+        "end": "2022-11-30",
+        "allocated_teams": [
+            6,
+            12,
+            13,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 115,
+        "package_id": 2,
+        "start": "2021-10-22",
+        "end": "2022-09-02",
+        "allocated_teams": [
+            1,
+            7,
+            14,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 116,
+        "package_id": 3,
+        "start": "2022-01-18",
+        "end": "2022-11-04",
+        "allocated_teams": [
+            2,
+            8,
+            15,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 117,
+        "package_id": 2,
+        "start": "2021-01-16",
+        "end": "2021-11-27",
+        "allocated_teams": [
+            3,
+            9,
+            16,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 118,
+        "package_id": 1,
+        "start": "2020-12-28",
+        "end": "2021-12-12",
+        "allocated_teams": [
+            4,
+            10,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 119,
+        "package_id": 2,
+        "start": "2020-09-24",
+        "end": "2021-08-04",
+        "allocated_teams": [
+            5,
+            11,
+            17,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 120,
+        "package_id": 5,
+        "start": "2020-12-30",
+        "end": "2021-08-23",
+        "allocated_teams": [
+            6,
+            12,
+            18,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 121,
+        "package_id": 1,
+        "start": "2023-06-26",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 122,
+        "package_id": 5,
+        "start": "2023-01-15",
+        "end": "2023-10-07",
+        "allocated_teams": [
+            2,
+            8,
+            13,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 123,
+        "package_id": 5,
+        "start": "2020-03-15",
+        "end": "2021-04-23",
+        "allocated_teams": [
+            3,
+            9,
+            14,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 124,
+        "package_id": 3,
+        "start": "2020-02-23",
+        "end": "2020-12-27",
+        "allocated_teams": [
+            4,
+            10,
+            15,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 125,
+        "package_id": 4,
+        "start": "2020-01-02",
+        "end": "2020-09-28",
+        "allocated_teams": [
+            5,
+            11,
+            16,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 126,
+        "package_id": 4,
+        "start": "2023-12-18",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            6,
+            12,
+            17,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 127,
+        "package_id": 4,
+        "start": "2020-08-08",
+        "end": "2021-03-12",
+        "allocated_teams": [
+            1,
+            7,
+            18,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 128,
+        "package_id": 4,
+        "start": "2020-01-24",
+        "end": "2021-04-05",
+        "allocated_teams": [
+            2,
+            8,
+            13,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 130,
+        "package_id": 2,
+        "start": "2023-11-27",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            14,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 131,
+        "package_id": 3,
+        "start": "2023-09-04",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            4,
+            10,
+            15,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 132,
+        "package_id": 2,
+        "start": "2020-05-28",
+        "end": "2021-02-14",
+        "allocated_teams": [
+            5,
+            11,
+            16,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 133,
+        "package_id": 5,
+        "start": "2023-10-23",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            6,
+            12,
+            17,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 134,
+        "package_id": 3,
+        "start": "2021-01-19",
+        "end": "2021-08-27",
+        "allocated_teams": [
+            1,
+            7,
+            18,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 135,
+        "package_id": 3,
+        "start": "2020-05-14",
+        "end": "2021-04-29",
+        "allocated_teams": [
+            2,
+            8,
+            13,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 136,
+        "package_id": 5,
+        "start": "2023-12-16",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            3,
+            9,
+            14,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 137,
+        "package_id": 4,
+        "start": "2020-02-20",
+        "end": "2020-11-24",
+        "allocated_teams": [
+            4,
+            10,
+            15,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 138,
+        "package_id": 1,
+        "start": "2023-12-29",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 139,
+        "package_id": 3,
+        "start": "2020-01-07",
+        "end": "2020-07-31",
+        "allocated_teams": [
+            6,
+            12,
+            16,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 141,
+        "package_id": 5,
+        "start": "2021-08-23",
+        "end": "2022-04-02",
+        "allocated_teams": [
+            1,
+            7,
+            17,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 142,
+        "package_id": 2,
+        "start": "2021-12-31",
+        "end": "2022-07-16",
+        "allocated_teams": [
+            2,
+            8,
+            18,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 144,
+        "package_id": 3,
+        "start": "2020-09-06",
+        "end": "2021-05-27",
+        "allocated_teams": [
+            3,
+            9,
+            13,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 145,
+        "package_id": 2,
+        "start": "2023-01-20",
+        "end": "2023-08-15",
+        "allocated_teams": [
+            4,
+            10,
+            14,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 146,
+        "package_id": 1,
+        "start": "2022-07-09",
+        "end": "2023-06-02",
+        "allocated_teams": [
+            5,
+            11,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 147,
+        "package_id": 2,
+        "start": "2021-06-28",
+        "end": "2022-03-10",
+        "allocated_teams": [
+            6,
+            12,
+            15,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 148,
+        "package_id": 2,
+        "start": "2023-12-19",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            1,
+            7,
+            16,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 149,
+        "package_id": 4,
+        "start": "2020-01-10",
+        "end": "2020-09-06",
+        "allocated_teams": [
+            2,
+            8,
+            17,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 151,
+        "package_id": 2,
+        "start": "2020-01-29",
+        "end": "2020-10-11",
+        "allocated_teams": [
+            3,
+            9,
+            18,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 152,
+        "package_id": 3,
+        "start": "2023-12-21",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            4,
+            10,
+            13,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 154,
+        "package_id": 2,
+        "start": "2020-02-19",
+        "end": "2020-08-22",
+        "allocated_teams": [
+            5,
+            11,
+            14,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 156,
+        "package_id": 3,
+        "start": "2020-01-01",
+        "end": "2020-07-02",
+        "allocated_teams": [
+            6,
+            12,
+            15,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 157,
+        "package_id": 1,
+        "start": "2022-06-16",
+        "end": "2023-01-20",
+        "allocated_teams": [
+            1,
+            7,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 158,
+        "package_id": 2,
+        "start": "2023-12-12",
+        "end": "2023-12-31",
+        "allocated_teams": [
+            2,
+            8,
+            16,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 159,
+        "package_id": 1,
+        "start": "2020-01-18",
+        "end": "2020-08-07",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 160,
+        "package_id": 4,
+        "start": "2022-05-03",
+        "end": "2022-12-06",
+        "allocated_teams": [
+            4,
+            10,
+            17,
+            22,
+            28,
+            34
+        ]
+    },
+    {
+        "project_id": 161,
+        "package_id": 3,
+        "start": "2020-01-20",
+        "end": "2020-08-20",
+        "allocated_teams": [
+            5,
+            11,
+            18,
+            23,
+            29,
+            35
+        ]
+    },
+    {
+        "project_id": 166,
+        "package_id": 5,
+        "start": "2021-12-29",
+        "end": "2022-08-13",
+        "allocated_teams": [
+            6,
+            12,
+            13,
+            24,
+            30,
+            36
+        ]
+    },
+    {
+        "project_id": 167,
+        "package_id": 5,
+        "start": "2021-09-30",
+        "end": "2022-04-27",
+        "allocated_teams": [
+            1,
+            7,
+            14,
+            19,
+            25,
+            31
+        ]
+    },
+    {
+        "project_id": 192,
+        "package_id": 1,
+        "start": "2020-02-28",
+        "end": "2020-08-30",
+        "allocated_teams": [
+            2,
+            8,
+            20,
+            26,
+            32
+        ]
+    },
+    {
+        "project_id": 193,
+        "package_id": 1,
+        "start": "2020-01-03",
+        "end": "2020-07-09",
+        "allocated_teams": [
+            3,
+            9,
+            21,
+            27,
+            33
+        ]
+    },
+    {
+        "project_id": 199,
+        "package_id": 4,
+        "start": "2021-11-19",
+        "end": "2022-06-15",
+        "allocated_teams": [
+            4,
+            10,
+            15,
+            22,
+            28,
+            34
+        ]
+    }
+]
