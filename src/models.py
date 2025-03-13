@@ -46,3 +46,8 @@ class ProjectTeam(Base):
     __tablename__ = 'project_teams'
     project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
     team_id = Column(Integer, ForeignKey('teams.id'), primary_key=True)
+
+class Category(Base):
+    __tablename__ = 'task_category'
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)

@@ -1,72 +1,102 @@
+import os
+import sys
 import json
-import joblib
-import numpy as np
-from datetime import datetime
-from pydantic import BaseModel
+from datetime import datetime, timedelta
+from openai import OpenAI
+from sqlalchemy.orm import Session
 
-# Load model and label encoder
-model = joblib.load("src/classifier/task_scheduling_classifier.pkl")
-label_encoder = joblib.load("src/classifier/label_encoder.pkl")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-# Define categories in correct order
-categories = [
-    ("1 Year to 6 Months before", 180, 365),
-    ("9 Months to 6 Months before", 270, 365),
-    ("6 Months to 3 Months before", 90, 180),
-    ("4 Months to 3 Months before", 120, 150),
-    ("3 Months to 1 Month before", 30, 90),
-    ("1 Month to 1 Week before", 7, 30),
-    ("1 Week before and Wedding Day", 1, 7),
-    ("Wedding Day", 0, 0),
-    ("6 Months after Wedding Day", 180, 180)
-]
+from src.models import Category, Project
+from src.schemas import CategoryScheduleRequest
+from src.database import SessionLocal  # Use existing database connection
 
-def predict_categories(project_name, start, end):
-    """Predicts categories for a project based on start and end dates."""
-    print(f"\nPredicting categories for project: {project_name}")
+def get_openai_client():
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        raise ValueError("GITHUB_TOKEN is not set in environment variables")
+    
+    return OpenAI(api_key=token, base_url="https://models.inference.ai.azure.com")
 
-    # Convert dates to datetime
-    start_date = datetime.strptime(start, "%Y-%m-%d")
-    end_date = datetime.strptime(end, "%Y-%m-%d")
-    duration = (end_date - start_date).days
+def get_categories(db: Session):
+    return [category.name for category in db.query(Category).all()]
 
-    predicted_categories = []
-    seen_categories = set()  # Avoid duplicates
+def calculate_schedule(start_date: str, end_date: str, db: Session):
+    start, end = datetime.strptime(start_date, "%Y-%m-%d"), datetime.strptime(end_date, "%Y-%m-%d")
+    duration = (end - start).days
 
-    for category, min_days, max_days in categories:
-        if category == "6 Months after Wedding Day":
-            start_day = duration  # Starts from wedding day
-            end_day = duration + max_days  # Extends 180 days beyond wedding day
-        else:
-            start_day = max(0, duration - max_days)
-            end_day = max(0, duration - min_days)
+    categories = [category.name for category in db.query(Category).all()]
+    category_count = len(categories)
+    if not category_count:
+        return []
+    
+    # Assign at least one day per category if project duration is too short
+    if duration < category_count:
+        return [
+            {"category": cat, "start": (start + timedelta(days=i)).strftime("%Y-%m-%d"), "end": (start + timedelta(days=i)).strftime("%Y-%m-%d")}
+            for i, cat in enumerate(categories) if start + timedelta(days=i) <= end
+        ]
 
-        if start_day > end_day:
-            continue  # Skip invalid categories
+    # Evenly distribute time across categories
+    segment_size = duration // category_count
+    category_schedule = []
+    current_start = start
 
-        # Predict category
-        input_data = np.array([[duration, start_day, end_day]])
-        predicted_label = model.predict(input_data)
-        predicted_category = label_encoder.inverse_transform(predicted_label)[0]
+    for i, category in enumerate(categories):
+        current_end = end if i == category_count - 1 else current_start + timedelta(days=segment_size)
+        category_schedule.append({
+            "category": category,
+            "start": current_start.strftime("%Y-%m-%d"),
+            "end": current_end.strftime("%Y-%m-%d")
+        })
+        current_start = current_end + timedelta(days=1)
+        if current_start > end:
+            break
+    
+    return category_schedule
 
-        if predicted_category not in seen_categories:
-            predicted_categories.append({"category": predicted_category, "date_range": [start_day, end_day]})
-            seen_categories.add(predicted_category)
+def generate_schedule(request: CategoryScheduleRequest, db: Session):
+    return {
+        "project_id": request.project_id,
+        "start": request.start,
+        "end": request.end,
+        "duration": (datetime.strptime(request.end, "%Y-%m-%d") - datetime.strptime(request.start, "%Y-%m-%d")).days,
+        "category_schedule": calculate_schedule(request.start, request.end, db)
+    }
 
-    # Print predicted categories
-    print("\nPredicted Categories with Date Ranges:")
-    for cat in predicted_categories:
-        print(f"Category: {cat['category']} | Date Range: {cat['date_range']}")
+def main():
+    db = SessionLocal()
+    
+    # Ensure a test project exists
+    if not db.query(Project).filter_by(id=1).first():
+        test_project = Project(id=1, name="Test Project")
+        db.add(test_project)
+        db.commit()
+        
+    request = CategoryScheduleRequest(project_id=1, start="2025-06-01", end="2025-12-01")
+    schedule = generate_schedule(request, db)
+    
+    client = get_openai_client()
+    system_prompt = f"""
+    You are an AI scheduler for task categories. The scheduling rules:
+    - Assign schedules based on project span.
+    - Adjust proportionally to the project’s duration.
+    - Ensure minimal slots for short projects.
+    - Evenly distribute if possible, with the last category absorbing extra days.
+    Given the project from {request.start} to {request.end}:
+    {json.dumps(schedule['category_schedule'], indent=4)}
+    Optimize this schedule following the rules.
+    """
+    
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "system", "content": system_prompt}],
+        temperature=1,
+        max_tokens=1024,
+        top_p=1
+    )
+    
+    print(json.dumps(schedule, indent=4))
 
-    return predicted_categories
-
-class PredictRequest(BaseModel):
-    project_name: str
-    start: str
-    end: str
-
-# Example test
-test_project_name = "Test Project"
-test_start = "2023-01-01"
-test_end = "2023-12-31"  # A full-year project
-predicted_results = predict_categories(test_project_name, test_start, test_end)
+if __name__ == "__main__":
+    main()

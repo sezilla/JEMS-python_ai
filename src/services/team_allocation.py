@@ -11,7 +11,7 @@ from sqlalchemy import select
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 # Now imports from src should work
-from src.models import Department, Team, Package, TaskPackage, Task, Project, ProjectTeam, DepartmentTeam
+from src.models import TaskPackage, Task, ProjectTeam, DepartmentTeam
 from src.database import get_db
 
 # Initialize OpenAI client
