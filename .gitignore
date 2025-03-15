@@ -71,3 +71,5 @@ dataset.json
 .env
 
 .vercel
+
+/secret/
