@@ -12,22 +12,26 @@ from src.config import DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USE
 
 from src.services.team_allocation import process_allocation_request, load_allocation_history, HISTORY_FILE
 
-# Initialize logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Middleware-like dependency to check origin
 def verify_origin(request: Request):
-    allowed_origin = LARAVEL_URL.rstrip("/")
+    allowed_origins = [
+        LARAVEL_URL.rstrip("/"),
+    ]
     origin = request.headers.get("origin") or request.headers.get("referer")
 
-    if not origin or not origin.startswith(allowed_origin):
+    if origin is None:
+        return True  
+
+    if not any(origin.startswith(allowed) for allowed in allowed_origins):
         logger.warning(f"Unauthorized request from origin: {origin}")
         raise HTTPException(status_code=403, detail="Forbidden: Invalid request source")
 
     return True
+
 
 @app.get("/", dependencies=[Depends(verify_origin)])
 async def health_check():
