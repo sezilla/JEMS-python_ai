@@ -33,7 +33,7 @@ def verify_origin(request: Request):
     return True
 
 
-@app.get("/", dependencies=[Depends(verify_origin)])
+@app.get("/")
 async def health_check():
     return {"status": "healthy", "message": "Hello World"}
 

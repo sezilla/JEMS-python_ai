@@ -69,3 +69,5 @@ dataset.json
 /results/checkpoint-100/*
 
 .env
+
+.vercel
