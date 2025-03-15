@@ -6,3 +6,5 @@ python-dotenv
 openai
 gunicorn
 uvicorn
+sshtunnel
+ssh_tunnel
