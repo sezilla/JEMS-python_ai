@@ -34,6 +34,10 @@ __pycache__/
 /src/classifier/runningModels/
 /src/classifier/history/
 
+/src/history/category_schedules.json
+/src/history/team_allocation.json
+/src/history/special_requests.json
+
 # /src/classifier/*
 
 # project-history.json
