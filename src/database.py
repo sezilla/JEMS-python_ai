@@ -1,117 +1,206 @@
-from sqlalchemy import create_engine
+import logging
+import time
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import mysql.connector
-import os
-import logging
-from urllib.parse import urlparse, parse_qs
-from sshtunnel import SSHTunnelForwarder
-from dotenv import load_dotenv
+from sqlalchemy.exc import OperationalError
+from src.config import (
+    DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, 
+    DATABASE_USER, DATABASE_PASSWORD, USE_SSH_TUNNEL,
+    SSH_HOST, SSH_USER, SSH_PRIVATE_KEY_PATH
+)
 
-# Load environment variables
-load_dotenv()
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("database")
 
-# Get environment variables
-DB_URL = os.getenv("DB_URL")
-PRIVATE_KEY_PATH = os.getenv("SSH_PRIVATE_KEY")
+# Create SSH tunnel instance if in production mode
+ssh_tunnel = None
+local_port = 13306  # Use a different local port to avoid conflicts
 
-# Default database values (fallback)
-DATABASE_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DATABASE_PORT = int(os.getenv("DB_PORT", "3306"))
-DATABASE_NAME = os.getenv("DB_DATABASE", "forge")
-DATABASE_USER = os.getenv("DB_USERNAME", "forge")
-DATABASE_PASSWORD = os.getenv("DB_PASSWORD", "")
+# Global DATABASE_URL variable for reuse
+DATABASE_URL = None
+engine = None
+SessionLocal = None
 
-SSH_HOST = None
-SSH_USER = None
+def initialize_connection(max_retries=3):
+    """Initialize the database connection and SSH tunnel if needed"""
+    global ssh_tunnel, DATABASE_URL, engine, SessionLocal
+    
+    if USE_SSH_TUNNEL:
+        try:
+            # Import here to prevent circular imports
+            from src.utils.ssh_tunnel import SSHTunnel
+            
+            logger.info("Initializing SSH tunnel...")
+            ssh_tunnel = SSHTunnel(
+                ssh_host=SSH_HOST,
+                ssh_user=SSH_USER,
+                ssh_pkey=SSH_PRIVATE_KEY_PATH,
+                remote_host=DATABASE_HOST,
+                remote_port=DATABASE_PORT,
+                local_port=local_port
+            )
+            
+            # Start the SSH tunnel
+            logger.info("Starting SSH tunnel...")
+            ssh_tunnel.start()
+            
+            # Wait a moment for the tunnel to establish
+            time.sleep(1)
+            
+            if ssh_tunnel.tunnel_is_up:
+                logger.info(f"SSH tunnel established successfully on local port {local_port}")
+                
+                # When using SSH tunnel, we connect to localhost through the tunnel
+                DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@127.0.0.1:{local_port}/{DATABASE_NAME}"
+            else:
+                logger.error("SSH tunnel failed to establish")
+                
+                # Fall back to direct connection as a last resort
+                logger.warning("Falling back to direct connection as SSH tunnel failed")
+                DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+        except Exception as e:
+            logger.error(f"Error setting up SSH tunnel: {str(e)}")
+            
+            # Fall back to direct connection as a last resort
+            logger.warning("Falling back to direct connection as SSH tunnel setup failed")
+            DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+    else:
+        # Direct connection without SSH tunnel
+        DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
-# Ensure PRIVATE_KEY_PATH is not None
-if not PRIVATE_KEY_PATH:
-    logger.error("SSH_PRIVATE_KEY environment variable is not set.")
-    exit(1)
+    logger.info(f"Creating database engine with URL: {DATABASE_URL}")
 
-# Parse DB_URL if it exists
-if DB_URL:
-    try:
-        logger.debug(f"Parsing DB_URL: {DB_URL}")
-        parsed_url = urlparse(DB_URL)
-        query_params = parse_qs(parsed_url.query)
+    # Create the SQLAlchemy engine with optimized connection parameters
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+        pool_recycle=1800,  # 30 minutes
+        max_overflow=3,
+        pool_size=5,
+        pool_timeout=10,
+        connect_args={
+            "connect_timeout": 5,
+            "use_pure": True
+        }
+    )
 
-        ssh_part, db_part = parsed_url.netloc.split("@")
-        SSH_USER, SSH_HOST = ssh_part.split("@")
-        DATABASE_HOST = db_part.split("/")[0]  # Extract MySQL host
+    # Test the connection before proceeding
+    retries = 0
+    connected = False
+    last_error = None
+    
+    while retries < max_retries and not connected:
+        try:
+            # Test the connection
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT 1"))
+                connected = True
+                logger.info("Database connection test successful")
+        except OperationalError as e:
+            retries += 1
+            last_error = e
+            logger.warning(f"Database connection test failed (attempt {retries}/{max_retries}): {str(e)}")
+            time.sleep(1)
+    
+    if not connected:
+        logger.error(f"Failed to connect to database after {max_retries} attempts: {last_error}")
+        # Continue anyway, let the application decide whether to fail or retry later
+    
+    # Create session factory
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return DATABASE_URL
 
-        logger.info(f"Using SSH Tunnel: {SSH_USER}@{SSH_HOST} → {DATABASE_HOST}")
-    except Exception as e:
-        logger.error(f"Failed to parse DB_URL: {e}")
-        exit(1)
+# Initialize the connection
+try:
+    DATABASE_URL = initialize_connection()
+except Exception as e:
+    logger.error(f"Failed to initialize database connection: {str(e)}")
+    # Set up a minimal configuration to let the app start anyway
+    DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+    engine = create_engine(DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Function to start SSH tunnel
-def create_ssh_tunnel():
-    try:
-        logger.debug(f"Starting SSH tunnel: {SSH_USER}@{SSH_HOST} with key {PRIVATE_KEY_PATH}")
-
-        tunnel = SSHTunnelForwarder(
-            (SSH_HOST, 22),
-            ssh_username=SSH_USER,
-            ssh_pkey=PRIVATE_KEY_PATH,
-            remote_bind_address=(DATABASE_HOST, 3306),
-            local_bind_address=("127.0.0.1", 3307)
-        )
-        tunnel.start()
-        logger.info(f"SSH tunnel established: 127.0.0.1:3307 → {DATABASE_HOST}:3306")
-        return tunnel
-    except Exception as e:
-        logger.error(f"SSH Tunnel Error: {e}")
-        return None
-
-# Start SSH tunnel
-ssh_tunnel = create_ssh_tunnel()
-if ssh_tunnel:
-    DATABASE_HOST = "127.0.0.1"
-    DATABASE_PORT = 3307
-else:
-    logger.error("SSH Tunnel failed. Cannot proceed with MySQL connection.")
-    exit(1)
-
-# Construct SQLAlchemy connection URL
-DATABASE_URL = f"mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Test connection
-def test_mysql_connection():
+def get_db():
+    """
+    Get a database session and handle cleanup properly.
+    This function is used as a dependency in FastAPI endpoints.
+    """
+    global engine, SessionLocal
+    
+    # If the session factory doesn't exist yet, create it
+    if SessionLocal is None:
+        logger.warning("SessionLocal was None, creating new session factory")
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    db = None
     try:
-        connection = mysql.connector.connect(
-            host=DATABASE_HOST,
-            user=DATABASE_USER,
-            password=DATABASE_PASSWORD,
-            database=DATABASE_NAME,
-            port=DATABASE_PORT,
-            connection_timeout=5
-        )
-        cursor = connection.cursor()
-        cursor.execute("SELECT VERSION()")
-        version = cursor.fetchone()
-        logger.info(f"Connected to MySQL version: {version}")
-        cursor.close()
-        return {"status": "success", "version": version}
-    except mysql.connector.Error as e:
-        logger.error(f"MySQL Error: {e}")
-        return {"status": "failure", "error": str(e)}
+        db = SessionLocal()
+        # Test connection before returning
+        db.execute(text("SELECT 1")).fetchone()
+        yield db
+    except OperationalError as e:
+        logger.error(f"Database session error: {str(e)}")
+        # Try to reinitialize connection
+        if db:
+            db.close()
+        logger.info("Attempting to reinitialize database connection")
+        initialize_connection(max_retries=1)
+        
+        # Create a new session with the new engine
+        if SessionLocal:
+            db = SessionLocal()
+            yield db
+        else:
+            raise
     except Exception as e:
-        logger.error(f"Unexpected Error: {e}")
-        return {"status": "failure", "error": str(e)}
+        logger.error(f"Database session error: {str(e)}")
+        raise
     finally:
-        if 'connection' in locals():
-            connection.close()
+        if db:
+            db.close()
 
-# Clean up SSH tunnel on exit
-import atexit
-if ssh_tunnel:
-    atexit.register(ssh_tunnel.stop)
+def test_connection():
+    """
+    Test the database connection and return server version.
+    """
+    db = None
+    try:
+        db = SessionLocal()
+        result = db.execute(text("SELECT VERSION()")).fetchone()
+        version = result[0] if result else "Unknown"
+        return {
+            "status": "success",
+            "message": f"Successfully connected to MySQL server with user '{DATABASE_USER}'",
+            "version": version,
+            "using_ssh_tunnel": USE_SSH_TUNNEL and ssh_tunnel and ssh_tunnel.tunnel_is_up,
+            "database": DATABASE_NAME
+        }
+    except Exception as e:
+        logger.error(f"Database connection test error: {str(e)}")
+        return {
+            "status": "error",
+            "error": f"Could not reach MySQL server: {str(e)}",
+            "attempted_connection": {
+                "user": DATABASE_USER,
+                "database": DATABASE_NAME,
+                "using_ssh_tunnel": USE_SSH_TUNNEL and ssh_tunnel and ssh_tunnel.tunnel_is_up
+            }
+        }
+    finally:
+        if db:
+            db.close()
+
+def close_ssh_tunnel():
+    """
+    Helper function to close the SSH tunnel when shutting down the application.
+    This should be called during application shutdown.
+    """
+    if ssh_tunnel and ssh_tunnel.tunnel_is_up:
+        logger.info("Closing SSH tunnel...")
+        ssh_tunnel.stop()
+        logger.info("SSH tunnel closed")

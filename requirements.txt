@@ -7,3 +7,4 @@ openai
 gunicorn
 uvicorn
 sshtunnel
+ssh_tunnel
