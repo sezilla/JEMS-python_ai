@@ -16,8 +16,8 @@ load_dotenv()
 DB_CONNECTION = os.getenv("DB_CONNECTION", "local")
 DATABASE_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DATABASE_PORT = int(os.getenv("DB_PORT", "3306"))
-DATABASE_NAME = os.getenv("DB_DATABASE", "forge")
-DATABASE_USER = os.getenv("DB_USERNAME", "forge")
+DATABASE_NAME = os.getenv("DB_DATABASE", "MultiProjectBasedEventManagement")
+DATABASE_USER = os.getenv("DB_USERNAME", "root")
 DATABASE_PASSWORD = os.getenv("DB_PASSWORD", "")
 
 # Log the loaded values for debugging
