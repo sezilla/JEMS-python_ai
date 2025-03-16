@@ -1,250 +1,213 @@
 import os
-import json
 import sys
-from datetime import datetime
-from typing import Dict, List, Any
-import openai
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+import json
+import datetime
+from openai import OpenAI
+import logging
+from typing import List, Dict, Any
+
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-from src.models import TaskPackage, Task, ProjectTeam, DepartmentTeam
+from src.database import SessionLocal
 from src.config import GITHUB_TOKEN, MODEL_NAME
-from src.database import get_db
+from src.models import (
+    Package,
+    TaskPackage,
+    DepartmentTeam,
+    TeamAllocation,
+    Task
+    )
+from src.schemas import TeamAllocationRequest, TeamAllocationResponse
 
-def get_openai_client():
-    token = GITHUB_TOKEN
-    if not token:
-        raise ValueError("GITHUB_TOKEN is not set in environment variables")
-    openai.api_key = token
-    openai.api_base = "https://models.inference.ai.azure.com"
-    return openai
+client = OpenAI(
+    api_key=GITHUB_TOKEN,
+    base_url="https://models.inference.ai.azure.com"
+)
 
-TEAM_ALLOCATION_HISTORY = os.path.join(os.path.dirname(os.path.dirname(__file__)), "history", "team_allocation.json")
+if not client.api_key:
+    raise ValueError("GITHUB_TOKEN is not set in environment variables")
 
-os.makedirs(os.path.dirname(TEAM_ALLOCATION_HISTORY), exist_ok=True)
-
-def load_allocation_history() -> List[Dict]:
-    """Load team allocation history from file"""
+def get_package() -> List[Package]:
+    session = SessionLocal()
     try:
-        with open(TEAM_ALLOCATION_HISTORY, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+        packages = session.query(Package).all()
+        return packages
+    finally:
+        session.close()
 
-def save_allocation_history(history: List[Dict]):
-    """Save team allocation history to file"""
-    with open(TEAM_ALLOCATION_HISTORY, 'w') as f:
-        json.dump(history, f, indent=2)
+def get_task() -> List[Task]:
+    session = SessionLocal()
+    try:
+        tasks = session.query(Task).all()
+        return tasks
+    finally:
+        session.close()
 
-def get_department_teams(db: Session) -> Dict[int, List[int]]:
-    """Get mapping of department IDs to team IDs from database"""
-    department_teams = {}
-    
-    results = db.execute(
-        select(DepartmentTeam.department_id, DepartmentTeam.team_id)
-    ).all()
-    
-    for dept_id, team_id in results:
-        department_teams.setdefault(dept_id, []).append(team_id)
-    
-    return department_teams
+def get_task_package() -> List[TaskPackage]:
+    session = SessionLocal()
+    try:
+        task_packages = session.query(TaskPackage).all()
+        return task_packages
+    finally:
+        session.close()
 
-def get_package_departments(db: Session) -> Dict[int, List[int]]:
-    """Get mapping of package IDs to department IDs from database"""
-    package_departments = {}
-    
-    task_packages = db.execute(
-        select(TaskPackage.package_id, Task.department_id)
-        .join(Task, TaskPackage.task_id == Task.id)
-    ).all()
-    
-    for package_id, dept_id in task_packages:
-        package_departments.setdefault(package_id, [])
-        if dept_id not in package_departments[package_id]:
-            package_departments[package_id].append(dept_id)
-    
-    return package_departments
+def get_department_team() -> List[DepartmentTeam]:
+    session = SessionLocal()
+    try:
+        department_teams = session.query(DepartmentTeam).all()
+        return department_teams
+    finally:
+        session.close()
 
-def get_team_workload(history: List[Dict]) -> Dict[int, int]:
-    """Calculate workload for each team based on allocation history"""
-    team_workload = {}
-    for allocation in history:
-        if allocation.get("message") == "success":
-            for team_id in allocation.get("allocated_teams", []):
-                team_workload[team_id] = team_workload.get(team_id, 0) + 1
-    return team_workload
+def get_team_allocation() -> List[TeamAllocation]:
+    session = SessionLocal()
+    try:
+        allocated_teams = session.query(TeamAllocation).all()
+        return allocated_teams
+    finally:
+        session.close()
 
-def is_team_available(team_id: int, project_start: str, project_end: str, history: List[Dict]) -> bool:
-    """Check if a team is available for the given project dates"""
-    project_start_date = datetime.strptime(project_start, "%Y-%m-%d")
-    project_end_date = datetime.strptime(project_end, "%Y-%m-%d")
-    
-    for allocation in history:
-        if allocation.get("message") != "success" or team_id not in allocation.get("allocated_teams", []):
-            continue
-        
-        alloc_start = datetime.strptime(allocation["start"], "%Y-%m-%d")
-        alloc_end = datetime.strptime(allocation["end"], "%Y-%m-%d")
-        
-        if (project_start_date <= alloc_end and project_end_date >= alloc_start and 
-            project_end_date == alloc_end):
-            return False
-    return True
-
-def allocate_teams(project_id: int, package_id: int, start_date: str, end_date: str) -> Dict[str, Any]:
-    """Allocate teams to a project based on the package"""
-    db = next(get_db())
-    history = load_allocation_history()
-    
-    department_teams = get_department_teams(db)
-    package_departments = get_package_departments(db)
-    
-    team_workload = get_team_workload(history)
-    
-    if package_id not in package_departments:
-        return {
-            "project_id": project_id,
-            "message": "failed",
-            "package_id": package_id,
-            "start": start_date,
-            "end": end_date,
-            "allocated_teams": [],
-            "reason": f"Package ID {package_id} not found"
-        }
-    
-    departments = package_departments[package_id]
-    allocated_teams = []
-    failed_departments = []
-    
-    for dept_id in departments:
-        if dept_id not in department_teams:
-            failed_departments.append(dept_id)
-            continue
+def clean_json_response(response_text: str) -> Dict[str, Any]:
+    """Cleans up AI-generated JSON response safely."""
+    try:
+        # Try to extract JSON if wrapped in code blocks
+        response_text = response_text.strip()
+        if "```json" in response_text:
+            json_content = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            json_content = response_text.split("```")[1].split("```")[0].strip()
+        else:
+            json_content = response_text
             
-        available_teams = department_teams[dept_id]
-        sorted_teams = sorted(available_teams, key=lambda t: team_workload.get(t, 0))
+        # Find the first occurrence of '{' and the last occurrence of '}'
+        start_idx = json_content.find('{')
+        end_idx = json_content.rfind('}')
         
-        team_allocated = False
-        for team_id in sorted_teams:
-            if is_team_available(team_id, start_date, end_date, history):
-                allocated_teams.append(team_id)
-                team_workload[team_id] = team_workload.get(team_id, 0) + 1
-                team_allocated = True
-                break
-        
-        if not team_allocated:
-            allocated_teams.append(sorted_teams[0])
-            team_workload[sorted_teams[0]] = team_workload.get(sorted_teams[0], 0) + 1
+        if start_idx != -1 and end_idx != -1:
+            json_content = json_content[start_idx:end_idx+1]
+            
+        result = json.loads(json_content)
+        return result
+    except Exception as e:
+        # Return a default error structure if parsing fails
+        return {
+            "success": False,
+            "error": f"Failed to parse response: {str(e)}",
+            "raw_response": response_text
+        }
+
+def convert_to_safe_dict(obj: Any) -> Dict[str, Any]:
+    """Convert SQLAlchemy objects to dictionaries with only their public attributes."""
+    if obj is None:
+        return {}
     
-    result = {
-        "project_id": project_id,
-        "message": "success" if not failed_departments else "failed",
-        "package_id": package_id,
-        "start": start_date,
-        "end": end_date,
-        "allocated_teams": allocated_teams
-    }
-    
-    if failed_departments:
-        result["failed_departments"] = failed_departments
-    
-    if result["message"] == "success":
-        for team_id in allocated_teams:
-            project_team = ProjectTeam(project_id=project_id, team_id=team_id)
-            db.add(project_team)
-        try:
-            db.commit()
-        except Exception as e:
-            db.rollback()
-            result["message"] = "failed"
-            result["reason"] = f"Database error: {str(e)}"
-    
-    history.append(result)
-    save_allocation_history(history)
-    
+    result = {}
+    # Get all non-private attributes
+    for attr in dir(obj):
+        if not attr.startswith('_') and not callable(getattr(obj, attr)):
+            try:
+                value = getattr(obj, attr)
+                # Try to make the value JSON serializable
+                if isinstance(value, datetime.date):
+                    result[attr] = str(value)
+                elif isinstance(value, (int, float, str, bool, type(None))):
+                    result[attr] = value
+            except Exception:
+                # Skip attributes that can't be accessed or serialized
+                pass
     return result
 
-def process_allocation_request(input_data: Dict) -> Dict:
-    """Process team allocation request using local logic"""
-    try:
-        project_id = input_data.get("project_id")
-        package_id = input_data.get("package_id")
-        start_date = input_data.get("start")
-        end_date = input_data.get("end")
-        
-        if None in (project_id, package_id, start_date, end_date):
-            return {
-                "message": "failed",
-                "reason": "Missing required fields: project_id, package_id, start, end"
-            }
-        return allocate_teams(project_id, package_id, start_date, end_date)
-        
-    except Exception as e:
-        return {
-            "message": "failed",
-            "reason": f"Error processing request: {str(e)}"
-        }
+def allocate_team(team_allocation: TeamAllocationRequest) -> TeamAllocationResponse:
+    packages = get_package()
+    tasks = get_task()
+    task_packages = get_task_package()
+    department_teams = get_department_team()
+    history = get_team_allocation()
 
-def main():
-    use_gpt4o = os.getenv("USE_GPT4O", "0") == "1"
-    client = get_openai_client()
-    
-    system_prompt = """You are an AI API that responds in JSON format to allocate teams to projects based on the departments included in a selected project package.
+    # Convert objects to safe dictionaries
+    package_data = [convert_to_safe_dict(p) for p in packages]
+    task_data = [convert_to_safe_dict(t) for t in tasks]
+    task_package_data = [convert_to_safe_dict(tp) for tp in task_packages]
+    department_team_data = [convert_to_safe_dict(dt) for dt in department_teams]
+    allocation_history = [convert_to_safe_dict(h) for h in history]
 
-## Team Allocation Rules:
-1. Each department has teams associated with it through the DepartmentTeam relationship.
-2. Each package includes a set of departments through tasks.
-3. When a package is selected for a project, only the departments of the selected package will have teams allocated.
-4. Each department in a package should have exactly one team allocated to the project.
-5. Team allocation should balance workload across teams.
+    prompt = f"""
+You are a team allocation assistant. Based on the following data:
 
-## Expected Input:
-{
-    "project_id": int,
-    "package_id": int,
-    "start": str,  # Start date of project
-    "end": str     # The event day
-}
+PROJECT INFO:
+- Project ID: {team_allocation.project_id}
+- Package ID: {team_allocation.package_id}
+- Time span: {team_allocation.start} to {team_allocation.end}
 
-## Expected Output:
-{
-    "project_id": int,
-    "message": "success/failed",
-    "package_id": int,
-    "start": str,
-    "end": str,
-    "allocated_teams": list  # List of allocated team IDs
-}
+ALLOCATION RULES:
+- Only allocate teams from departments associated with package_id {team_allocation.package_id}
+- Ensure teams are available during the requested timespan
+- Balance workload across teams (use allocation_history to determine current loads)
+- Teams can be allocated to multiple projects if necessary
+- When all teams are busy, stack projects while maintaining balanced workload
+
+DATA:
+Packages: {json.dumps(package_data)}
+Tasks: {json.dumps(task_data)}
+Task-Package Relations: {json.dumps(task_package_data)}
+Department Teams: {json.dumps(department_team_data)}
+Current Allocations: {json.dumps(allocation_history)}
+
+Return ONLY a JSON object in this format:
+{{
+    "success": true,
+    "project_id": {team_allocation.project_id},
+    "package_id": {team_allocation.package_id},
+    "start": "{team_allocation.start}",
+    "end": "{team_allocation.end}",
+    "allocated_teams": [team_id1, team_id2, ...]
+}}
 """
     
-    user_input = '{"project_id": 1, "package_id": 1, "start": "2025-04-01", "end": "2025-04-05"}'
-    
-    if use_gpt4o:
-        try:
-            response = client.ChatCompletion.create(
-                model=MODEL_NAME,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_input}
-                ],
-                max_tokens=256,
-                temperature=0
-            )
-            output = response["choices"][0]["message"]["content"]
-            print(output)
-        except Exception as e:
-            print(json.dumps({"message": "failed", "reason": str(e)}))
-    else:
-        try:
-            input_data = json.loads(user_input)
-        except json.JSONDecodeError:
-            print(json.dumps({"message": "failed", "reason": "Invalid JSON input"}))
-            return
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": team_allocation.model_dump_json()}
+        ],
+        max_tokens=3000,
+        temperature=0.2,
+        response_format={"type": "json_object"}
+    )
+
+    try:
+        output_text = response.choices[0].message.content
+        result = clean_json_response(output_text)
         
-        result = process_allocation_request(input_data)
-        print(json.dumps(result, indent=2))
+        # Check if parsing failed
+        if not result.get("success", False) and "error" in result:
+            raise ValueError(f"AI returned invalid JSON: {result.get('error')}")
+        
+        # Convert the result to a TeamAllocationResponse
+        return TeamAllocationResponse(
+            success=result.get("success", False),
+            project_id=result.get("project_id", team_allocation.project_id),
+            package_id=result.get("package_id", team_allocation.package_id),
+            start=result.get("start", team_allocation.start),
+            end=result.get("end", team_allocation.end),
+            allocated_teams=result.get("allocated_teams", [])
+        )
+    except Exception as e:
+        raise ValueError(f"Failed to process allocation: {str(e)}")
+    
 
 if __name__ == "__main__":
-    main()
+    test_request = TeamAllocationRequest(
+        project_id=1,
+        package_id=2,
+        start="2024-09-01",
+        end="2025-07-05"
+    )
+
+    try:
+        result = allocate_team(test_request)
+        print(json.dumps(result.model_dump(), indent=2))
+    except Exception as e:
+        print(json.dumps({"success": False, "message": "failed", "reason": str(e)}, indent=2))

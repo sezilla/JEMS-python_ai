@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 # Request Body
-class ProjectAllocationRequest(BaseModel):
+class TeamAllocationRequest(BaseModel):
     project_id: int
     package_id: int
     start: str
@@ -24,6 +24,7 @@ class TeamAllocationResponse(BaseModel):
     package_id: int
     start: str
     end: str
+    allocated_teams: list[int]
 
 class SpecialRequestResponse(BaseModel):
     success: bool
