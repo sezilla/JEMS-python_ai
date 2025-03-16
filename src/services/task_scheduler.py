@@ -23,12 +23,12 @@ if not client.api_key:
     raise ValueError("GITHUB_TOKEN is not set in environment variables")
 
 history_dir = "src/history"
-history_file = os.path.join(history_dir, "category_schedules.json")
+SCHEDULE_HISTORY = os.path.join(history_dir, "category_schedules.json")
 
 os.makedirs(history_dir, exist_ok=True)
 
-if not os.path.exists(history_file):
-    with open(history_file, "w") as f:
+if not os.path.exists(SCHEDULE_HISTORY):
+    with open(SCHEDULE_HISTORY, "w") as f:
         json.dump([], f)
 
 def get_categories():
@@ -108,7 +108,7 @@ def create_schedule(project_id: int, start: str, end: str) -> dict:
 
 def save_schedule(schedule: dict):
     try:
-        with open(history_file, "r+") as f:
+        with open(SCHEDULE_HISTORY, "r+") as f:
             try:
                 history = json.load(f)
             except json.JSONDecodeError:

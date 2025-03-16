@@ -29,7 +29,7 @@ from src.schemas import (
     CategoryScheduleRequest
     )
 from src.services.team_allocation import process_allocation_request, load_allocation_history, TEAM_ALLOCATION_HISTORY
-from src.services.special_request import generate_special_request, save_special_request, history_file
+from src.services.special_request import generate_special_request, save_special_request, HISTORY_SPECIAL_REQUEST
 from src.services.task_scheduler import create_schedule, save_schedule
 
 app = FastAPI(title="Team Allocation API")
@@ -176,12 +176,6 @@ def allocate_teams(request: ProjectAllocationRequest):
         logger.error("Error during team allocation: %s", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@app.get("/allocated-teams/{project_id}", dependencies=[Depends(verify_origin)])
-def get_allocated_teams(project_id: int):
-    history = load_allocation_history()
-    allocated_teams = [entry for entry in history if entry["project_id"] == project_id]
-    return {"success": True, "allocated_teams": allocated_teams}
-
 @app.get("/project-history", dependencies=[Depends(verify_origin)])
 def get_project_history():
     try:
@@ -211,8 +205,8 @@ def generate_special_request_endpoint(request: SpecialRequest):
 @app.get("/special-request-history", dependencies=[Depends(verify_origin)])
 def get_special_request_history():
     try:
-        if os.path.exists(history_file):
-            with open(history_file, "r") as file:
+        if os.path.exists(HISTORY_SPECIAL_REQUEST):
+            with open(HISTORY_SPECIAL_REQUEST, "r") as file:
                 history = json.load(file)
             return {"message": "Special request history fetched successfully", "data": history}
         return {"message": "No special request history available"}

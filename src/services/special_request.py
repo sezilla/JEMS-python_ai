@@ -18,12 +18,12 @@ if not client.api_key:
     raise ValueError("GITHUB_TOKEN is not set in environment variables")
 
 history_dir = "src/history"
-history_file = os.path.join(history_dir, "special_requests.json")
+HISTORY_SPECIAL_REQUEST = os.path.join(history_dir, "special_requests.json")
 
 os.makedirs(history_dir, exist_ok=True)
 
-if not os.path.exists(history_file):
-    with open(history_file, "w") as f:
+if not os.path.exists(HISTORY_SPECIAL_REQUEST):
+    with open(HISTORY_SPECIAL_REQUEST, "w") as f:
         json.dump([], f)
 
 def get_departments():
@@ -100,7 +100,7 @@ Please generate a structured JSON output in the format:
 def save_special_request(special_request: dict):
     """Saves special requests history in JSON file."""
     try:
-        with open(history_file, "r+") as f:
+        with open(HISTORY_SPECIAL_REQUEST, "r+") as f:
             try:
                 history = json.load(f)
             except json.JSONDecodeError:
