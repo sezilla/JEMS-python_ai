@@ -11,11 +11,12 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.database import SessionLocal
+from src.config import GITHUB_TOKEN, MODEL_NAME
 from src.models import Category
 
 client = OpenAI(
     base_url="https://models.inference.ai.azure.com",
-    api_key=os.getenv("GITHUB_TOKEN")
+    api_key = GITHUB_TOKEN
 )
 
 if not client.api_key:
@@ -83,7 +84,7 @@ Please generate a schedule for each category. For each category, assign a start 
     """
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=MODEL_NAME,
         messages=[
             {"role": "system", "content": prompt}
         ],

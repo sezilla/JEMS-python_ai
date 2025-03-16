@@ -3,31 +3,26 @@ import json
 import sys
 from datetime import datetime
 from typing import Dict, List, Any
-import openai  # Using the openai library
+import openai
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-# Add the project root to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-# Now imports from src should work
 from src.models import TaskPackage, Task, ProjectTeam, DepartmentTeam
+from src.config import GITHUB_TOKEN, MODEL_NAME
 from src.database import get_db
 
-# Initialize OpenAI client configured for GPT-4o
 def get_openai_client():
-    token = os.getenv("GITHUB_TOKEN")
+    token = GITHUB_TOKEN
     if not token:
         raise ValueError("GITHUB_TOKEN is not set in environment variables")
-    # Configure API key and base URL (adjust these as needed for your GPT-4o deployment)
     openai.api_key = token
     openai.api_base = "https://models.inference.ai.azure.com"
     return openai
 
-# History file path
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "history", "team_allocation.json")
 
-# Ensure history directory exists
 os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
 
 def load_allocation_history() -> List[Dict]:
@@ -47,12 +42,10 @@ def get_department_teams(db: Session) -> Dict[int, List[int]]:
     """Get mapping of department IDs to team IDs from database"""
     department_teams = {}
     
-    # Query all department-team relationships
     results = db.execute(
         select(DepartmentTeam.department_id, DepartmentTeam.team_id)
     ).all()
     
-    # Group teams by department
     for dept_id, team_id in results:
         department_teams.setdefault(dept_id, []).append(team_id)
     
@@ -62,13 +55,11 @@ def get_package_departments(db: Session) -> Dict[int, List[int]]:
     """Get mapping of package IDs to department IDs from database"""
     package_departments = {}
     
-    # Query tasks associated with packages
     task_packages = db.execute(
         select(TaskPackage.package_id, Task.department_id)
         .join(Task, TaskPackage.task_id == Task.id)
     ).all()
     
-    # Group departments by package
     for package_id, dept_id in task_packages:
         package_departments.setdefault(package_id, [])
         if dept_id not in package_departments[package_id]:
@@ -97,7 +88,6 @@ def is_team_available(team_id: int, project_start: str, project_end: str, histor
         alloc_start = datetime.strptime(allocation["start"], "%Y-%m-%d")
         alloc_end = datetime.strptime(allocation["end"], "%Y-%m-%d")
         
-        # Check for overlapping dates (with the condition that the project end matches the allocation end)
         if (project_start_date <= alloc_end and project_end_date >= alloc_start and 
             project_end_date == alloc_end):
             return False
@@ -108,14 +98,11 @@ def allocate_teams(project_id: int, package_id: int, start_date: str, end_date: 
     db = next(get_db())
     history = load_allocation_history()
     
-    # Get department-team and package-department mappings
     department_teams = get_department_teams(db)
     package_departments = get_package_departments(db)
     
-    # Calculate team workloads for balancing
     team_workload = get_team_workload(history)
     
-    # Check if package exists
     if package_id not in package_departments:
         return {
             "project_id": project_id,
@@ -127,22 +114,18 @@ def allocate_teams(project_id: int, package_id: int, start_date: str, end_date: 
             "reason": f"Package ID {package_id} not found"
         }
     
-    # Get departments for this package
     departments = package_departments[package_id]
     allocated_teams = []
     failed_departments = []
     
-    # For each department in the package, allocate one team
     for dept_id in departments:
         if dept_id not in department_teams:
             failed_departments.append(dept_id)
             continue
             
         available_teams = department_teams[dept_id]
-        # Sort teams by workload (least busy first)
         sorted_teams = sorted(available_teams, key=lambda t: team_workload.get(t, 0))
         
-        # Try to find an available team
         team_allocated = False
         for team_id in sorted_teams:
             if is_team_available(team_id, start_date, end_date, history):
@@ -151,12 +134,10 @@ def allocate_teams(project_id: int, package_id: int, start_date: str, end_date: 
                 team_allocated = True
                 break
         
-        # If no team is available with ideal scheduling, pick the least busy one
         if not team_allocated:
             allocated_teams.append(sorted_teams[0])
             team_workload[sorted_teams[0]] = team_workload.get(sorted_teams[0], 0) + 1
     
-    # Create response
     result = {
         "project_id": project_id,
         "message": "success" if not failed_departments else "failed",
@@ -169,7 +150,6 @@ def allocate_teams(project_id: int, package_id: int, start_date: str, end_date: 
     if failed_departments:
         result["failed_departments"] = failed_departments
     
-    # Save allocation to history and to the database if successful
     if result["message"] == "success":
         for team_id in allocated_teams:
             project_team = ProjectTeam(project_id=project_id, team_id=team_id)
@@ -208,11 +188,9 @@ def process_allocation_request(input_data: Dict) -> Dict:
         }
 
 def main():
-    # Use GPT-4o if the environment variable USE_GPT4O is set to "1"
     use_gpt4o = os.getenv("USE_GPT4O", "0") == "1"
     client = get_openai_client()
     
-    # System prompt with allocation rules and expected JSON format
     system_prompt = """You are an AI API that responds in JSON format to allocate teams to projects based on the departments included in a selected project package.
 
 ## Team Allocation Rules:
@@ -241,27 +219,24 @@ def main():
 }
 """
     
-    # Sample user input (JSON format)
     user_input = '{"project_id": 1, "package_id": 1, "start": "2025-04-01", "end": "2025-04-05"}'
     
     if use_gpt4o:
-        # Use GPT-4o to process the allocation request
         try:
             response = client.ChatCompletion.create(
-                model="gpt-4o",
+                model=MODEL_NAME,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input}
                 ],
-                max_tokens=256,  # Limit the maximum tokens in the response
+                max_tokens=256,
                 temperature=0
             )
             output = response["choices"][0]["message"]["content"]
-            print(output)  # Assumes GPT-4o returns valid JSON output
+            print(output)
         except Exception as e:
             print(json.dumps({"message": "failed", "reason": str(e)}))
     else:
-        # Use local allocation logic
         try:
             input_data = json.loads(user_input)
         except json.JSONDecodeError:
