@@ -10,33 +10,32 @@ from sqlalchemy.sql import text
 import time
 from functools import wraps
 
-# Import configuration before other modules
 from src.config import (
     DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USER, 
     DATABASE_PASSWORD, LARAVEL_URL, USE_SSH_TUNNEL
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 )
 logger = logging.getLogger("main")
 
-# Set up database connection and SSH tunnel
 from src.database import get_db, close_ssh_tunnel, test_connection, ssh_tunnel
 
-# Import schemas and services
-from src.schemas import ProjectAllocationRequest
-from src.services.team_allocation import process_allocation_request, load_allocation_history, HISTORY_FILE
+from src.schemas import (
+    ProjectAllocationRequest, 
+    SpecialRequest, 
+    CategoryScheduleRequest
+    )
+from src.services.team_allocation import process_allocation_request, load_allocation_history, TEAM_ALLOCATION_HISTORY
+from src.services.special_request import generate_special_request, save_special_request, history_file
+from src.services.task_scheduler import create_schedule, save_schedule
 
-# Create the FastAPI app
 app = FastAPI(title="Team Allocation API")
 
-# Register the SSH tunnel close function to run when application exits
 atexit.register(close_ssh_tunnel)
 
-# Function to retry database operations
 def with_db_retry(max_retries=3, retry_delay=1):
     def decorator(func):
         @wraps(func)
@@ -46,12 +45,10 @@ def with_db_retry(max_retries=3, retry_delay=1):
             
             while retries < max_retries:
                 try:
-                    # Check if SSH tunnel is still alive when in production mode
                     if USE_SSH_TUNNEL and ssh_tunnel:
                         if not ssh_tunnel.check_is_alive():
                             logger.warning("SSH tunnel was down, restarted it")
                     
-                    # Try the operation
                     return await func(*args, **kwargs)
                 
                 except OperationalError as e:
@@ -59,10 +56,8 @@ def with_db_retry(max_retries=3, retry_delay=1):
                     last_error = e
                     logger.warning(f"Database connection error (attempt {retries}/{max_retries}): {str(e)}")
                     
-                    # Wait before retrying
                     time.sleep(retry_delay)
                     
-                    # If this is our last retry, check if SSH tunnel needs restart
                     if retries == max_retries - 1 and USE_SSH_TUNNEL and ssh_tunnel:
                         logger.info("Attempting to restart SSH tunnel before final retry")
                         ssh_tunnel.stop()
@@ -70,18 +65,15 @@ def with_db_retry(max_retries=3, retry_delay=1):
                         ssh_tunnel.start()
                 
                 except SQLAlchemyError as e:
-                    # Other database errors we won't retry
                     logger.error(f"Database error: {str(e)}")
                     raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
             
-            # If we've exhausted retries, raise the last error
             logger.error(f"Failed after {max_retries} attempts: {str(last_error)}")
             raise HTTPException(status_code=503, detail="Database service unavailable")
         
         return wrapper
     return decorator
 
-# Middleware to verify origin
 async def verify_origin(request: Request):
     allowed_origins = [
         LARAVEL_URL.rstrip("/"),
@@ -97,21 +89,18 @@ async def verify_origin(request: Request):
 
     return True
 
-# Application lifecycle events
 @app.on_event("startup")
 async def startup_event():
     """Perform startup tasks"""
     logger.info("Application starting up...")
-    # Database connection is initialized in the database module
     logger.info(f"API configured with {'SSH tunnel' if USE_SSH_TUNNEL else 'direct'} database connection")
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Perform shutdown tasks"""
     logger.info("Application shutting down...")
-    close_ssh_tunnel()  # Close SSH tunnel if it exists
+    close_ssh_tunnel()
 
-# Add middleware for connection status and timing
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
@@ -120,13 +109,10 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
-# Health check endpoint
 @app.get("/")
 async def health_check():
     return {"status": "healthy", "message": "Team Allocation API", "timestamp": datetime.now().isoformat()}
 
-# Database connection test endpoint using our database module
-# Database connection test endpoint
 @app.get("/test")
 @with_db_retry(max_retries=3)
 async def test_database_connection():
@@ -156,6 +142,8 @@ async def test_database_connection():
 
 
 # SERVICES
+
+# TEAM ALLOCATION
 @app.post("/allocate-teams", dependencies=[Depends(verify_origin)])
 def allocate_teams(request: ProjectAllocationRequest):
     logger.info("Received allocation request: %s", request.dict())
@@ -197,14 +185,64 @@ def get_allocated_teams(project_id: int):
 @app.get("/project-history", dependencies=[Depends(verify_origin)])
 def get_project_history():
     try:
-        if os.path.exists(HISTORY_FILE):
-            with open(HISTORY_FILE, "r") as file:
+        if os.path.exists(TEAM_ALLOCATION_HISTORY):
+            with open(TEAM_ALLOCATION_HISTORY, "r") as file:
                 history = json.load(file)
             return {"message": "Project history fetched successfully", "data": history}
         return {"message": "No project history available"}
     except Exception as e:
         logger.error("Error fetching project history: %s", str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# SPECIAL REQUESTS
+@app.post("/special-request", dependencies=[Depends(verify_origin)])
+def generate_special_request_endpoint(request: SpecialRequest):
+    try:
+        special_request = generate_special_request(request)
+        save_special_request(special_request)
+        print("Generated Special Request:")
+        print(json.dumps(special_request, indent=4))
+        return special_request
+    except Exception as e:
+        logger.error("Error generating special request: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/special-request-history", dependencies=[Depends(verify_origin)])
+def get_special_request_history():
+    try:
+        if os.path.exists(history_file):
+            with open(history_file, "r") as file:
+                history = json.load(file)
+            return {"message": "Special request history fetched successfully", "data": history}
+        return {"message": "No special request history available"}
+    except Exception as e:
+        logger.error("Error fetching special request history: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# TASK SCHEDULER
+@app.post("/generate-schedule", dependencies=[Depends(verify_origin)])
+def generate_schedule_endpoint(request: CategoryScheduleRequest):
+    try:
+        # Validate input
+        if not request.project_id or not request.start or not request.end:
+            raise HTTPException(status_code=400, detail="Invalid request parameters")
+
+        schedule = create_schedule(request.project_id, request.start, request.end)
+        save_schedule(schedule)
+
+        logger.info("Generated Schedule: %s", json.dumps(schedule, indent=4))
+        return schedule
+
+    except ValueError as ve:
+        logger.error("JSON parsing error: %s", str(ve))
+        raise HTTPException(status_code=500, detail="Failed to parse AI response")
+
+    except Exception as e:
+        logger.error("Error generating schedule: %s", str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 
 # Run the application directly when this file is executed
 if __name__ == "__main__":

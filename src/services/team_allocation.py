@@ -21,21 +21,21 @@ def get_openai_client():
     openai.api_base = "https://models.inference.ai.azure.com"
     return openai
 
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "history", "team_allocation.json")
+TEAM_ALLOCATION_HISTORY = os.path.join(os.path.dirname(os.path.dirname(__file__)), "history", "team_allocation.json")
 
-os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
+os.makedirs(os.path.dirname(TEAM_ALLOCATION_HISTORY), exist_ok=True)
 
 def load_allocation_history() -> List[Dict]:
     """Load team allocation history from file"""
     try:
-        with open(HISTORY_FILE, 'r') as f:
+        with open(TEAM_ALLOCATION_HISTORY, 'r') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
 def save_allocation_history(history: List[Dict]):
     """Save team allocation history to file"""
-    with open(HISTORY_FILE, 'w') as f:
+    with open(TEAM_ALLOCATION_HISTORY, 'w') as f:
         json.dump(history, f, indent=2)
 
 def get_department_teams(db: Session) -> Dict[int, List[int]]:
