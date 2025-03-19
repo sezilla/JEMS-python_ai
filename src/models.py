@@ -55,8 +55,8 @@ class Category(Base):
 class TeamAllocation(Base):
     __tablename__ = 'team_allocations'
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)
-    package_id = Column(Integer, ForeignKey('packages.id'), nullable=False)
-    start_date = Column(Date, default=func.current_date(), nullable=False)
+    project_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"), nullable=False)
+    package_id = Column(Integer, ForeignKey('packages.id', ondelete="CASCADE"), nullable=False)
+    start_date = Column(Date, default=func.current_date, nullable=False)
     end_date = Column(Date, nullable=False)
     allocated_teams = Column(JSON, nullable=True)
