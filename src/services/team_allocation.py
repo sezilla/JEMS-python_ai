@@ -133,6 +133,25 @@ def allocate_team(team_allocation: TeamAllocationRequest) -> TeamAllocationRespo
     department_team_data = [convert_to_safe_dict(dt) for dt in department_teams]
     allocation_history = [convert_to_safe_dict(h) for h in history]
 
+    # Pre-compute eligible departments and teams for the package
+    # 1. Find tasks associated with the package
+    package_task_ids = [tp['task_id'] for tp in task_package_data 
+                      if tp.get('package_id') == team_allocation.package_id]
+    
+    # 2. Find departments associated with those tasks
+    eligible_dept_ids = [t['department_id'] for t in task_data 
+                       if t.get('id') in package_task_ids]
+    
+    # 3. Find teams belonging to those departments
+    eligible_team_ids = [dt['team_id'] for dt in department_team_data 
+                       if dt.get('department_id') in eligible_dept_ids]
+    
+    # Log the eligible relationships for debugging
+    print(f"Package {team_allocation.package_id} is associated with:")
+    print(f"- Task IDs: {package_task_ids}")
+    print(f"- Department IDs: {eligible_dept_ids}")
+    print(f"- Eligible Team IDs: {eligible_team_ids}")
+
     prompt = f"""
 You are a team allocation assistant. Based on the following data:
 
@@ -142,7 +161,8 @@ PROJECT INFO:
 - Time span: {team_allocation.start} to {team_allocation.end}
 
 ALLOCATION RULES:
-- Only allocate teams from departments associated with package_id {team_allocation.package_id}
+- IMPORTANT: You must ONLY allocate teams from this pre-validated list of eligible teams: {eligible_team_ids}
+- These are the only teams associated with departments that handle tasks for package {team_allocation.package_id}
 - Ensure teams are available during the requested timespan
 - Balance workload across teams (use allocation_history to determine current loads)
 - Teams can be allocated to multiple projects if necessary
@@ -162,7 +182,7 @@ Return ONLY a JSON object in this format:
     "package_id": {team_allocation.package_id},
     "start": "{team_allocation.start}",
     "end": "{team_allocation.end}",
-    "allocated_teams": [team_id1, team_id2, ...]
+    "allocated_teams": [team_id1, team_id2, ...] // MUST ONLY include IDs from {eligible_team_ids}
 }}
 """
     
@@ -185,14 +205,23 @@ Return ONLY a JSON object in this format:
         if not result.get("success", False) and "error" in result:
             raise ValueError(f"AI returned invalid JSON: {result.get('error')}")
         
-        # Convert the result to a TeamAllocationResponse
+        # Additional validation to ensure only eligible teams are allocated
+        allocated_teams = result.get("allocated_teams", [])
+        invalid_teams = [team for team in allocated_teams if team not in eligible_team_ids]
+        
+        if invalid_teams:
+            print(f"WARNING: AI attempted to allocate invalid teams: {invalid_teams}")
+            # Filter out invalid teams
+            allocated_teams = [team for team in allocated_teams if team in eligible_team_ids]
+        
+        # Convert the result to a TeamAllocationResponse with validated teams
         return TeamAllocationResponse(
             success=result.get("success", False),
             project_id=result.get("project_id", team_allocation.project_id),
             package_id=result.get("package_id", team_allocation.package_id),
             start=result.get("start", team_allocation.start),
             end=result.get("end", team_allocation.end),
-            allocated_teams=result.get("allocated_teams", [])
+            allocated_teams=allocated_teams
         )
     except Exception as e:
         raise ValueError(f"Failed to process allocation: {str(e)}")
@@ -201,7 +230,7 @@ Return ONLY a JSON object in this format:
 if __name__ == "__main__":
     test_request = TeamAllocationRequest(
         project_id=1,
-        package_id=2,
+        package_id=1,
         start="2024-09-01",
         end="2025-07-05"
     )
