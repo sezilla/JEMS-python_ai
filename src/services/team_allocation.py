@@ -16,6 +16,7 @@ from src.models import (
     Package,
     TaskPackage,
     DepartmentTeam,
+    Department,
     TeamAllocation,
     Task
     )
@@ -34,6 +35,14 @@ def get_package() -> List[Package]:
     try:
         packages = session.query(Package).all()
         return packages
+    finally:
+        session.close()
+
+def get_department() -> List[Department]:
+    session = SessionLocal()
+    try:
+        departments = session.query(Department).all()
+        return departments
     finally:
         session.close()
 
