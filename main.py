@@ -149,24 +149,29 @@ def allocate_teams(request: TeamAllocationRequest):
     logger.info("Received allocation request: %s", request.model_dump())
 
     try:
+        sync_db_to_json()
+
+        start_date_str = str(request.start)
+        end_date_str = str(request.end)
+
+        if end_date_str < start_date_str:
+            logger.error("Invalid date range: Start %s, End %s", start_date_str, end_date_str)
+            raise HTTPException(status_code=400, detail="End date cannot be before start date.")
+
         try:
+            result = allocate_team(request)
+
+            if not result.success:
+                logger.error("Allocation failed")
+                raise HTTPException(status_code=500, detail="Failed to allocate teams")
+
             sync_db_to_json()
-            start_date_str = str(request.start)
-            end_date_str = str(request.end)
-            if end_date_str < start_date_str:
-                logger.error("Invalid date range: Start %s, End %s", start_date_str, end_date_str)
-                raise HTTPException(status_code=400, detail="End date cannot be before start date.")
+
+            return result.model_dump()
+
         except ValueError as ve:
             logger.error("Invalid date format: %s", str(ve))
             raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
-
-        result = allocate_team(request)
-
-        if not result.success:
-            logger.error("Allocation failed")
-            raise HTTPException(status_code=500, detail="Failed to allocate teams")
-
-        return result.model_dump()
 
     except HTTPException:
         raise
