@@ -41,6 +41,8 @@ class Project(Base):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+    start = Column(Date, nullable=False)
+    end = Column(Date, nullable=False)
 
 class ProjectTeam(Base):
     __tablename__ = 'project_teams'
