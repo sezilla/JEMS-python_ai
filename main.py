@@ -28,7 +28,7 @@ from src.schemas import (
     SpecialRequest, 
     CategoryScheduleRequest
     )
-from src.services.team_allocation import allocate_team
+from src.services.team_allocation import allocate_team, sync_db_to_json, ALLOCATION_HISTORY
 from src.services.special_request import generate_special_request, save_special_request, HISTORY_SPECIAL_REQUEST
 from src.services.task_scheduler import create_schedule, save_schedule
 
@@ -149,47 +149,48 @@ def allocate_teams(request: TeamAllocationRequest):
     logger.info("Received allocation request: %s", request.model_dump())
 
     try:
-        # Validate date format and range
+        sync_db_to_json()
+
+        start_date_str = str(request.start)
+        end_date_str = str(request.end)
+
+        if end_date_str < start_date_str:
+            logger.error("Invalid date range: Start %s, End %s", start_date_str, end_date_str)
+            raise HTTPException(status_code=400, detail="End date cannot be before start date.")
+
         try:
-            start_date_str = str(request.start)
-            end_date_str = str(request.end)
-            if end_date_str < start_date_str:
-                logger.error("Invalid date range: Start %s, End %s", start_date_str, end_date_str)
-                raise HTTPException(status_code=400, detail="End date cannot be before start date.")
+            result = allocate_team(request)
+
+            if not result.success:
+                logger.error("Allocation failed")
+                raise HTTPException(status_code=500, detail="Failed to allocate teams")
+
+            sync_db_to_json()
+
+            return result.model_dump()
+
         except ValueError as ve:
             logger.error("Invalid date format: %s", str(ve))
             raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
-        # Call the allocate_team function with the TeamAllocationRequest object directly
-        result = allocate_team(request)
-
-        # Check if the result is successful
-        if not result.success:
-            logger.error("Allocation failed")
-            raise HTTPException(status_code=500, detail="Failed to allocate teams")
-
-        # Return the result as a dict
-        return result.model_dump()
-
     except HTTPException:
-        # Re-raise HTTP exceptions to preserve their status codes
         raise
 
     except Exception as e:
         logger.error("Error during team allocation: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-# @app.get("/project-history", dependencies=[Depends(verify_origin)])
-# def get_project_history():
-#     try:
-#         if os.path.exists(TEAM_ALLOCATION_HISTORY):
-#             with open(TEAM_ALLOCATION_HISTORY, "r") as file:
-#                 history = json.load(file)
-#             return {"message": "Project history fetched successfully", "data": history}
-#         return {"message": "No project history available"}
-#     except Exception as e:
-#         logger.error("Error fetching project history: %s", str(e))
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.get("/project-history", dependencies=[Depends(verify_origin)])
+def get_project_history():
+    try:
+        if os.path.exists(ALLOCATION_HISTORY):
+            with open(ALLOCATION_HISTORY, "r") as file:
+                history = json.load(file)
+            return {"message": "Project history fetched successfully", "data": history}
+        return {"message": "No project history available"}
+    except Exception as e:
+        logger.error("Error fetching project history: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # SPECIAL REQUESTS

@@ -126,7 +126,7 @@ if __name__ == "__main__":
     
     try:
         schedule = create_schedule(test_project_id, test_start, test_end)
-        save_schedule(schedule)
+        # save_schedule(schedule)
         print("Generated Schedule:")
         print(json.dumps(schedule, indent=4))
     except Exception as e:
