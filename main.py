@@ -25,7 +25,8 @@ from src.database import get_db, close_ssh_tunnel, test_connection, ssh_tunnel
 
 from src.schemas import (
     TeamAllocationRequest, 
-    SpecialRequest, 
+    SpecialRequest,
+    SpecialRequestResponse,
     CategoryScheduleRequest
     )
 from src.services.team_allocation import allocate_team, sync_db_to_json, ALLOCATION_HISTORY
@@ -195,16 +196,15 @@ def get_project_history():
 
 # SPECIAL REQUESTS
 @app.post("/special-request", dependencies=[Depends(verify_origin)])
-def generate_special_request_endpoint(request: SpecialRequest):
+def generate_special_request_endpoint(request: SpecialRequest) -> SpecialRequestResponse:
     try:
         special_request = generate_special_request(request)
         save_special_request(special_request)
-        print("Generated Special Request:")
-        print(json.dumps(special_request, indent=4))
+        logger.info("Generated Special Request: %s", json.dumps(special_request.dict(), indent=4))
         return special_request
     except Exception as e:
         logger.error("Error generating special request: %s", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to generate special request")
     
 @app.get("/special-request-history", dependencies=[Depends(verify_origin)])
 def get_special_request_history():

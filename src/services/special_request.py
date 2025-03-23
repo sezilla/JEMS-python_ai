@@ -2,12 +2,13 @@ import os
 import sys
 import json
 from openai import OpenAI
+from pydantic import ValidationError
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.config import GITHUB_TOKEN, MODEL_NAME
 from src.database import SessionLocal
-from src.models import Department 
-from src.schemas import SpecialRequest
+from src.models import Department
+from src.schemas import SpecialRequest, SpecialRequestResponse
 
 client = OpenAI(
     base_url="https://models.inference.ai.azure.com",
@@ -43,7 +44,7 @@ def clean_json_response(response_text: str) -> str:
         response_text = response_text[:-3]
     return response_text.strip()
 
-def generate_special_request(special_request: SpecialRequest) -> dict:
+def generate_special_request(special_request: SpecialRequest) -> SpecialRequestResponse:
     departments = get_departments()
     
     department_data = "\n".join(
@@ -70,11 +71,7 @@ Please generate a structured JSON output in the format:
     "success": <bool>,
     "project_id": {special_request.project_id},
     "special_request": [
-        {{
-            "department": "<department_name>",
-            "task": "<task_description>"
-        }},
-        ...
+        ["<department_name>", "<task_description>"]
     ]
 }}
 """
@@ -93,11 +90,12 @@ Please generate a structured JSON output in the format:
     try:
         output_text = response.choices[0].message.content
         cleaned_json = clean_json_response(output_text)
-        return json.loads(cleaned_json)
-    except (json.JSONDecodeError, AttributeError, IndexError) as e:
+        parsed_response = json.loads(cleaned_json)
+        return SpecialRequestResponse(**parsed_response)
+    except (json.JSONDecodeError, AttributeError, IndexError, ValidationError) as e:
         raise ValueError(f"Failed to parse JSON from AI response: {output_text}") from e
 
-def save_special_request(special_request: dict):
+def save_special_request(special_request: SpecialRequestResponse):
     """Saves special requests history in JSON file."""
     try:
         with open(HISTORY_SPECIAL_REQUEST, "r+") as f:
@@ -106,26 +104,31 @@ def save_special_request(special_request: dict):
             except json.JSONDecodeError:
                 history = []
 
-            history.append(special_request)
+            history.append(special_request.dict())
             f.seek(0)
             json.dump(history, f, indent=4)
     except Exception as e:
         print(f"Error saving special request: {e}")
 
 if __name__ == "__main__":
-    test_project_id = 1
-    test_request = """The couple envisions a **fairytale-themed wedding**, where every detail creates an enchanting experience. 
-    The event will feature a regal banquet with gourmet dishes, a molecular gastronomy station, and signature themed cocktails. 
-    The bride will have a princess-inspired look, while the groom and bridal party embrace a polished, royal style. 
-    Cinematic storytelling will capture magical moments with drone and slow-motion shots. 
-    The venue will be transformed with cascading floral arches, chandeliers, and a candlelit aisle. 
-    A live orchestra, harpist, and a surprise royal ball dance will add to the charm, with seamless coordination ensuring a flawless and stress-free celebration.
-    """
+    test_request = SpecialRequest(
+        project_id=1,
+        special_request="""
+        For our wedding, we would like to incorporate a few special elements to make the day truly unique. 
+        We request a floral arrangement featuring white and blush roses with eucalyptus accents for the ceremony and reception. 
+        Our color theme is navy blue and gold, so we’d love for the décor, table settings, and lighting to complement this palette. 
+        For the ceremony, we would like a live string quartet to play as guests arrive and during the vows. During the reception, 
+        we’d prefer a mix of classic jazz and modern hits for the background music, with a DJ taking over for the dance portion. 
+        Additionally, we request a fully vegetarian menu with gluten-free options for select guests. For dessert, 
+        we’d love a tiered cake with vanilla and raspberry flavors, along with a small dessert bar featuring macarons and chocolate-covered strawberries. 
+        We also plan to have a sparkler send-off at the end of the night, so we’d appreciate assistance in organizing this safely.
+        """
+    )
 
     try:
-        special_request = generate_special_request(test_project_id, test_request)
-        save_special_request(special_request)
+        special_request_response = generate_special_request(test_request)
+        save_special_request(special_request_response)
         print("Generated Special Request:")
-        print(json.dumps(special_request, indent=4))
+        print(json.dumps(special_request_response.dict(), indent=4))
     except Exception as e:
         print(f"Error generating special request tasks: {e}")
