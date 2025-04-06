@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
+from typing import Dict, List, Optional
 
 # Request Body
 class TeamAllocationRequest(BaseModel):
@@ -11,11 +12,8 @@ class SpecialRequest(BaseModel):
     project_id: int
     special_request: str
 
-class CategoryScheduleRequest(BaseModel):
+class TaskScheduleRequest(BaseModel):
     project_id: int
-    start: str
-    end: str
-
 
 # Response Body
 class TeamAllocationResponse(BaseModel):
@@ -31,10 +29,13 @@ class SpecialRequestResponse(BaseModel):
     project_id: int
     special_request: list[list[str]]
 
-class CategoryScheduleResponse(BaseModel):
+class TaskScheduleResponse(RootModel):
+    root: Dict[str, Dict[str, Dict[str, str]]]
+
+class ScheduleResponse(BaseModel):
     success: bool
     project_id: int
     start: str
     end: str
     duration: int
-    categories: list[list[str]]
+    trello_tasks: TaskScheduleResponse

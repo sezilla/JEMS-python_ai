@@ -2,6 +2,11 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, Date, JSON, fu
 from sqlalchemy.orm import relationship
 from src.database import Base
 
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+
 class Package(Base):
     __tablename__ = 'packages'
     id = Column(Integer, primary_key=True, index=True)
@@ -37,6 +42,11 @@ class Team(Base):
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
 
+class TeamUser(Base):
+    __tablename__ = 'users_has_teams'
+    team_id = Column(Integer, ForeignKey('teams.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
 class Project(Base):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True, index=True)
@@ -62,3 +72,21 @@ class TeamAllocation(Base):
     start_date = Column(Date, default=func.current_date, nullable=False)
     end_date = Column(Date, nullable=False)
     allocated_teams = Column(JSON, nullable=True)
+
+class Skill(Base):
+    __tablename__ = 'skills'
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+
+class UserSkill(Base):
+    __tablename__ = 'user_skills'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    skill_id = Column(Integer, ForeignKey('skills.id'), primary_key=True)
+
+class TrelloProjectTask(Base):
+    __tablename__ = 'trello_project_tasks'
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)
+    trello_board_data = Column(JSON, nullable=True)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
