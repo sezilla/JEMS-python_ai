@@ -85,8 +85,9 @@ class UserSkill(Base):
 
 class TrelloProjectTask(Base):
     __tablename__ = 'trello_project_tasks'
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)
     trello_board_data = Column(JSON, nullable=True)
     start_date = Column(Date, nullable=False)
-    end_date = Column(Date, nullable=False)
+    event_date = Column(Date, nullable=False)
+

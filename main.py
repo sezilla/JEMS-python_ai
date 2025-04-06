@@ -27,11 +27,12 @@ from src.schemas import (
     TeamAllocationRequest, 
     SpecialRequest,
     SpecialRequestResponse,
-    CategoryScheduleRequest
+    TaskScheduleRequest,
+    ScheduleResponse
     )
 from src.services.team_allocation import allocate_team, sync_db_to_json, ALLOCATION_HISTORY
 from src.services.special_request import generate_special_request, save_special_request, HISTORY_SPECIAL_REQUEST
-from src.services.task_scheduler import create_schedule, save_schedule
+from src.services.task_scheduler import create_schedule, sync_trello_tasks_to_json, SCHEDULE_HISTORY
 
 app = FastAPI(title="Team Allocation API")
 
@@ -221,16 +222,16 @@ def get_special_request_history():
 
 # TASK SCHEDULER
 @app.post("/generate-schedule", dependencies=[Depends(verify_origin)])
-def generate_schedule_endpoint(request: CategoryScheduleRequest):
+def generate_schedule_endpoint(request: TaskScheduleRequest):
     try:
-        # Validate input
-        if not request.project_id or not request.start or not request.end:
+        sync_trello_tasks_to_json()
+
+        if not request.project_id:
             raise HTTPException(status_code=400, detail="Invalid request parameters")
 
-        schedule = create_schedule(request.project_id, request.start, request.end)
-        save_schedule(schedule)
+        schedule = create_schedule(request)
 
-        logger.info("Generated Schedule: %s", json.dumps(schedule, indent=4))
+        logger.info("Generated Schedule: %s", json.dumps(schedule.model_dump(), indent=4))
         return schedule
 
     except ValueError as ve:

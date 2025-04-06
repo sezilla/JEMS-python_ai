@@ -21,12 +21,14 @@ client = OpenAI(
 )
 
 if not client.api_key:
-    raise ValueError("OPENAI_API_KEY is not set in environment variables")
+    raise ValueError("GITHUB_TOKEN is not set in environment variables")
 
 history_dir = "src/history"
 SCHEDULE_HISTORY = os.path.join(history_dir, "tasks_schedules.json")
+
 os.makedirs(history_dir, exist_ok=True)
 
+# Initialize the history file if it doesn't exist.
 if not os.path.exists(SCHEDULE_HISTORY):
     with open(SCHEDULE_HISTORY, "w") as f:
         json.dump([], f)
@@ -41,13 +43,13 @@ def get_trello_project_tasks() -> List[TrelloProjectTask]:
 
 def sync_trello_tasks_to_json():
     project_tasks = get_trello_project_tasks()
-    
+
     project_task_data = [
         {
             "project_id": task.project_id,
-            "start_date": task.start_date,
-            "end_date": task.end_date,
-            "trello_board_data": task.trello_board_data
+            "start_date": task.start_date.strftime('%Y-%m-%d'),  # Convert to string in YYYY-MM-DD format
+            "end_date": task.event_date.strftime('%Y-%m-%d'),    # Convert to string in YYYY-MM-DD format
+            "trello_board_data": json.loads(task.trello_board_data) if task.trello_board_data else None  # Parse JSON string to dictionary
         }
         for task in project_tasks
     ]
@@ -56,12 +58,16 @@ def sync_trello_tasks_to_json():
         json.dump(project_task_data, f, indent=4)
     print(f"Synced {len(project_tasks)} project tasks to {SCHEDULE_HISTORY}")
 
+
 def calculate_duration(start: str, end: str) -> int:
     start_date = datetime.datetime.strptime(start, "%Y-%m-%d")
     end_date = datetime.datetime.strptime(end, "%Y-%m-%d")
     return (end_date - start_date).days
 
 def clean_json_response(response_text: str) -> str:
+    """
+    Clean the response text by stripping markdown formatting.
+    """
     return response_text.strip().strip("```json").strip("```").strip()
 
 def save_schedule(schedule: dict):
@@ -77,12 +83,35 @@ def save_schedule(schedule: dict):
     except Exception as e:
         print(f"Error saving schedule: {e}")
 
+def get_project_data_from_history(project_id: int) -> Dict[str, Any]:
+    """
+    Retrieve the project data from the SCHEDULE_HISTORY file based on the given project_id.
+    """
+    try:
+        with open(SCHEDULE_HISTORY, "r") as f:
+            data = json.load(f)
+    except json.JSONDecodeError:
+        data = []
+    for record in data:
+        if record.get("project_id") == project_id:
+            return record
+    return None
+
 def create_schedule(request: TaskScheduleRequest) -> ScheduleResponse:
-    project_data = get_project_data(request.project_id)
-    
+    # Retrieve project data from the SCHEDULE_HISTORY file based on project_id.
+    project_data = get_project_data_from_history(request.project_id)
     if not project_data:
-        raise ValueError(f"No project data found for project ID: {request.project_id}")
-    
+        raise ValueError(f"No project data found for project_id: {request.project_id}")
+
+    # Prepare the AI prompt with project details.
+    prompt = f"""
+Project ID: {request.project_id}
+Start Date: {project_data.get("start_date")}
+End Date: {project_data.get("end_date")}
+Trello Board Data: {json.dumps(project_data.get("trello_board_data", {}), indent=2)}
+"""
+
+    # Define the scheduling rules for the AI.
     rules = """
 You are an AI assistant for generating project schedules. Follow these rules:
 
@@ -114,29 +143,20 @@ You are an AI assistant for generating project schedules. Follow these rules:
     }
 """
 
-    prompt = f"""
-Project ID: {request.project_id}
-Start Date: {project_data['start_date']}
-End Date: {project_data['end_date']}
-Trello Board Data: {json.dumps(project_data['trello_board_data'])}
-
-Please generate a schedule for this project with appropriate task assignments and due dates.
-"""
-
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": rules},
             {"role": "user", "content": prompt},
         ],
-        temperature=0.7,
-        max_tokens=2000,
-        top_p=1
+        temperature=1,
+        max_tokens=3000,
+        top_p=1,
+        response_format={"type": "json_object"}
     )
 
     response_text = response.choices[0].message.content
     cleaned_response = clean_json_response(response_text)
-    
     try:
         schedule_dict = json.loads(cleaned_response)
     except json.JSONDecodeError as e:
@@ -146,47 +166,19 @@ Please generate a schedule for this project with appropriate task assignments an
         schedule_dict["duration"] = calculate_duration(schedule_dict["start"], schedule_dict["end"])
 
     schedule = ScheduleResponse(**schedule_dict)
-    save_schedule(schedule.dict())
 
     return schedule
 
-def get_project_data(project_id: int) -> Dict[str, Any]:
-    try:
-        with open(SCHEDULE_HISTORY, "r") as f:
-            history = json.load(f)
-            
-        for entry in history:
-            if entry.get("project_id") == project_id:
-                return {
-                    "project_id": entry.get("project_id"),
-                    "start_date": entry.get("start_date"),
-                    "end_date": entry.get("end_date"),
-                    "trello_board_data": entry.get("trello_board_data")
-                }
-        
-        session = SessionLocal()
-        try:
-            task = session.query(TrelloProjectTask).filter(TrelloProjectTask.project_id == project_id).first()
-            if task:
-                return {
-                    "project_id": task.project_id,
-                    "start_date": task.start_date,
-                    "end_date": task.end_date,
-                    "trello_board_data": task.trello_board_data
-                }
-        finally:
-            session.close()
-            
-        return None
-    except Exception as e:
-        print(f"Error retrieving project data: {e}")
-        return None
-
 if __name__ == "__main__":
+    # Example: sync the project tasks before generating a schedule.
+    # (Ensure that SCHEDULE_HISTORY contains the necessary project data.)
+    sync_trello_tasks_to_json()
+
     dummy_request = TaskScheduleRequest(project_id=1)
 
     try:
         schedule = create_schedule(dummy_request)
-        print(schedule.json(indent=4))
+        # save_schedule(schedule.model_dump())
+        print(json.dumps(schedule.model_dump(), indent=4))
     except Exception as e:
         print(f"Error generating schedule: {e}")
