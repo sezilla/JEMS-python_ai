@@ -1,3 +1,4 @@
+import traceback
 from fastapi import FastAPI, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 import json
@@ -14,6 +15,7 @@ from src.config import (
     DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USER, 
     DATABASE_PASSWORD, LARAVEL_URL, USE_SSH_TUNNEL
 )
+from src.services.task_allocation import allocate_tasks
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +26,7 @@ logger = logging.getLogger("main")
 from src.database import get_db, close_ssh_tunnel, test_connection, ssh_tunnel
 
 from src.schemas import (
+    TaskAllocationRequest,
     TeamAllocationRequest, 
     SpecialRequest,
     SpecialRequestResponse,
@@ -241,7 +244,30 @@ def generate_schedule_endpoint(request: TaskScheduleRequest):
     except Exception as e:
         logger.error("Error generating schedule: %s", str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
+    
+# TASK ASSIGNMENT to users
+@app.post("/allocate-user-to-task")
+async def allocate_user_to_task(data: TaskAllocationRequest):
+    try:
+        print(f"Received allocation for project_id: {data.project_id}")
 
+        response = allocate_tasks(data)
+        
+        if not response.success:
+            raise HTTPException(status_code=500, detail=response.error or "Failed to allocate tasks")
+        
+        response_dict = response.model_dump()
+        
+        return {
+            "success": True,
+            "message": "Users allocated successfully.",
+            "allocation": response_dict["checklists"]  # Changed from checklist_id to checklists
+        }
+
+    except Exception as e:
+        print(f"Error in allocation endpoint: {str(e)}")
+        traceback.print_exc()  # Print full stack trace
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Run the application directly when this file is executed
 if __name__ == "__main__":
