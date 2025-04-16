@@ -1,5 +1,5 @@
 from pydantic import BaseModel, RootModel
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Request Body
 class TeamAllocationRequest(BaseModel):
@@ -14,6 +14,43 @@ class SpecialRequest(BaseModel):
 
 class TaskScheduleRequest(BaseModel):
     project_id: int
+
+# Task assignment request
+
+class CheckItem(BaseModel):
+    check_item_id: str
+    check_item_name: str
+
+class Checklist(BaseModel):
+    checklist_id: str
+    checklist_name: str
+    check_items: List[CheckItem]
+
+class CardData(BaseModel):
+    card_id: str
+    card_name: str
+    checklists: List[Checklist]
+
+class UserData(BaseModel):
+    user_id: int
+    skills: List[str]
+
+class TaskAllocationRequest(BaseModel):
+    project_id: int
+    data_array: List[CardData]
+    users: Dict[str, List[UserData]]
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Response Body
 class TeamAllocationResponse(BaseModel):
@@ -39,3 +76,13 @@ class ScheduleResponse(BaseModel):
     end: str
     duration: int
     trello_tasks: TaskScheduleResponse
+
+class ChecklistResponse(BaseModel):
+    user_id: int
+    check_items: List[CheckItem]
+
+class TaskAllocationResponse(BaseModel):
+    success: bool
+    project_id: int
+    checklists: Dict[str, List[Dict[str, Any]]]
+    error: Optional[str] = None
