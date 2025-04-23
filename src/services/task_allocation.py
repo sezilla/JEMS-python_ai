@@ -3,18 +3,15 @@ import re
 import sys
 import json
 import traceback
-from openai import OpenAI
-import datetime
 import logging
 from typing import List, Dict, Any
-
-logging.getLogger("openai").setLevel(logging.WARNING)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from openai import OpenAI
 from src.database import SessionLocal
 from src.config import GITHUB_TOKEN, MODEL_NAME
 from src.schemas import CardData, CheckItem, Checklist, TaskAllocationRequest, TaskAllocationResponse, UserData
+
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 client = OpenAI(
     api_key=GITHUB_TOKEN,
@@ -33,27 +30,21 @@ if not os.path.exists(TASK_ALLOCATION_HISTORY):
     with open(TASK_ALLOCATION_HISTORY, "w") as f:
         json.dump([], f)
 
-import re
-
 def clean_json_response(response_text: str) -> str:
-    """
-    Extracts the largest valid JSON object from a string.
-    Truncates at the last closing brace to avoid parsing errors.
-    """
-    # Find first "{" and last "}"
     start = response_text.find('{')
     end = response_text.rfind('}')
-
     if start == -1 or end == -1:
         raise ValueError("No valid JSON object found in response.")
-
     cleaned = response_text[start:end+1]
-
-    # Remove any trailing commas before closing braces/brackets
     cleaned = re.sub(r',\s*([\]}])', r'\1', cleaned)
-
     return cleaned
 
+def is_json_well_formed(text: str) -> bool:
+    try:
+        json.loads(text)
+        return True
+    except json.JSONDecodeError:
+        return False
 
 def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
     try:
@@ -112,19 +103,19 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
                 {"role": "system", "content": rules},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=2000,
+            max_tokens=4000,
             temperature=0.7
         )
 
         response_text = response.choices[0].message.content
         print(f"Raw model response:\n{response_text}")
 
-        try:
-            cleaned_response = clean_json_response(response_text)
-            parsed = json.loads(cleaned_response)
-        except json.JSONDecodeError as json_err:
-            logging.error(f"JSON parse error: {json_err}")
-            raise
+        cleaned_response = clean_json_response(response_text)
+
+        if not is_json_well_formed(cleaned_response):
+            raise ValueError("Model response JSON is not well-formed.")
+
+        parsed = json.loads(cleaned_response)
 
         result = TaskAllocationResponse(
             success=True,
@@ -158,9 +149,9 @@ if __name__ == "__main__":
             CardData(
                 card_id=uid(),
                 card_name="Design",
-                checklists=[  # ✅ Fix here
+                checklists=[
                     Checklist(
-                        checklist_id="67ff892b923c801dfa8cf7e8",  # ✅ Also fix missing checklist_id
+                        checklist_id="67ff892b923c801dfa8cf7e8",
                         checklist_name="Design Checklist",
                         check_items=[
                             CheckItem(
@@ -174,9 +165,9 @@ if __name__ == "__main__":
             CardData(
                 card_id=uid(),
                 card_name="Development",
-                checklists=[  # ✅ Fix here
+                checklists=[
                     Checklist(
-                        checklist_id="67ff892b923c801dfa8cf7eb",  # ✅ Fix ID
+                        checklist_id="67ff892b923c801dfa8cf7eb",
                         checklist_name="Development Checklist",
                         check_items=[
                             CheckItem(
@@ -204,11 +195,9 @@ if __name__ == "__main__":
         }
     )
 
-
     try:
         schedule = allocate_tasks(dummy_request)
         print("\n=== Allocation Result ===")
         print(json.dumps(schedule.model_dump(), indent=4))
     except Exception as e:
         print(f"Error generating schedule: {e}")
-
