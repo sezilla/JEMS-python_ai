@@ -74,7 +74,7 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
         - Final JSON format should be:
           {
             "checklist_id_1": [
-              {"user_id": int, "check_item_id": str, "check_item_name": str},
+              {"user_id": int, "card_id": str, "check_item_id": str, "check_item_name": str},
               ...
             ],
             "checklist_id_2": [

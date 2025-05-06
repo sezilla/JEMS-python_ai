@@ -269,7 +269,6 @@ async def allocate_user_to_task(data: TaskAllocationRequest):
         traceback.print_exc()  # Print full stack trace
         raise HTTPException(status_code=500, detail=str(e))
 
-# Run the application directly when this file is executed
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=3000, reload=True)
