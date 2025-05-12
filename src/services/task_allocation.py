@@ -58,10 +58,17 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
                 for item in checklist.check_items:
                     task_summary.append({
                         "card_id": card.card_id,
+                        "card_name": card.card_name,
+                        "card_due_date": card.card_due_date,
+                        "card_description": card.card_description,
+
                         "checklist_id": checklist.checklist_id,
                         "checklist_name": checklist.checklist_name,
+
                         "check_item_id": item.check_item_id,
-                        "check_item_name": item.check_item_name
+                        "check_item_name": item.check_item_name,
+                        "due_date": item.due_date,
+                        "status": item.status
                     })
 
         rules = """
@@ -72,14 +79,22 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
         - Spread tasks fairly.
         - IMPORTANT!!! The final JSON response must use checklist_id as the key.
         - Final JSON format should be:
+        
           {
-            "checklist_id_1": [
-              {"user_id": int, "card_id": str, "check_item_id": str, "check_item_name": str},
-              ...
-            ],
-            "checklist_id_2": [
-              ...
-            ]
+            "checklists": {
+                "checklist_id": {
+                    "checklist_name": str,
+                    "check_items": [
+                        {
+                            "check_item_id": str,
+                            "check_item_name": str,
+                            "due_date": str,
+                            "status": str,
+                            "user_id": int
+                        }
+                    ]
+                }
+            }
           }
         """
 
@@ -95,6 +110,8 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
 
         Users by Department:
         {json.dumps(users_dict, indent=2)}
+
+        Note: Each checklist_id should be a key in the checklists object, and its value should be a dictionary containing checklist_name and check_items array.
         """
 
         response = client.chat.completions.create(
@@ -111,16 +128,36 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
         print(f"Raw model response:\n{response_text}")
 
         cleaned_response = clean_json_response(response_text)
+        print(f"Cleaned response:\n{cleaned_response}")
 
         if not is_json_well_formed(cleaned_response):
             raise ValueError("Model response JSON is not well-formed.")
 
         parsed = json.loads(cleaned_response)
-
+        
+        # Validate the parsed structure
+        if "checklists" not in parsed:
+            raise ValueError("Response missing 'checklists' key")
+            
+        # Validate that checklists is a dictionary
+        if not isinstance(parsed["checklists"], dict):
+            raise ValueError("'checklists' must be a dictionary with checklist_id keys")
+            
+        # Validate each checklist has the required structure
+        for checklist_id, checklist_data in parsed["checklists"].items():
+            if not isinstance(checklist_data, dict):
+                raise ValueError(f"Checklist {checklist_id} must be a dictionary")
+            if "checklist_name" not in checklist_data:
+                raise ValueError(f"Checklist {checklist_id} missing 'checklist_name'")
+            if "check_items" not in checklist_data:
+                raise ValueError(f"Checklist {checklist_id} missing 'check_items'")
+            if not isinstance(checklist_data["check_items"], list):
+                raise ValueError(f"Checklist {checklist_id} 'check_items' must be a list")
+            
         result = TaskAllocationResponse(
             success=True,
             project_id=request.project_id,
-            checklists=parsed
+            checklists=parsed["checklists"]
         )
 
         print(f"Response object content: {result.model_dump()}")
@@ -149,6 +186,8 @@ if __name__ == "__main__":
             CardData(
                 card_id=uid(),
                 card_name="Design",
+                card_due_date="2024-03-30",
+                card_description="Design phase tasks",
                 checklists=[
                     Checklist(
                         checklist_id="67ff892b923c801dfa8cf7e8",
@@ -156,7 +195,8 @@ if __name__ == "__main__":
                         check_items=[
                             CheckItem(
                                 check_item_id="67ff892c923c801dfa8cf9ff",
-                                check_item_name="Create mockups"
+                                check_item_name="Create mockups",
+                                due_date="2024-03-25"
                             ),
                         ]
                     )
@@ -165,6 +205,8 @@ if __name__ == "__main__":
             CardData(
                 card_id=uid(),
                 card_name="Development",
+                card_due_date="2024-03-31",
+                card_description="Development phase tasks",
                 checklists=[
                     Checklist(
                         checklist_id="67ff892b923c801dfa8cf7eb",
@@ -172,11 +214,13 @@ if __name__ == "__main__":
                         check_items=[
                             CheckItem(
                                 check_item_id="67ff892c923c801dfa8cfa0c",
-                                check_item_name="Build login API"
+                                check_item_name="Build login API",
+                                due_date="2024-03-26"
                             ),
                             CheckItem(
                                 check_item_id="67ff892c923c801dfa8cfa0d",
-                                check_item_name="Setup database schema"
+                                check_item_name="Setup database schema",
+                                due_date="2024-03-27"
                             )
                         ]
                     )

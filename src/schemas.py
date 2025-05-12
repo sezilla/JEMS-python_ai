@@ -20,6 +20,8 @@ class TaskScheduleRequest(BaseModel):
 class CheckItem(BaseModel):
     check_item_id: str
     check_item_name: str
+    due_date: str
+    status: str = 'incomplete'
 
 class Checklist(BaseModel):
     checklist_id: str
@@ -29,6 +31,8 @@ class Checklist(BaseModel):
 class CardData(BaseModel):
     card_id: str
     card_name: str
+    card_due_date: str
+    card_description: str
     checklists: List[Checklist]
 
 class UserData(BaseModel):
@@ -84,5 +88,5 @@ class ChecklistResponse(BaseModel):
 class TaskAllocationResponse(BaseModel):
     success: bool
     project_id: int
-    checklists: Dict[str, List[Dict[str, Any]]]
+    checklists: Dict[str, Dict[str, Any]]
     error: Optional[str] = None
