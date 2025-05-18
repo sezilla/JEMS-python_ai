@@ -116,55 +116,63 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
         Note: Each checklist_id should be a key in the checklists object, and its value should be a dictionary containing checklist_name and check_items array.
         """
 
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[
-                {"role": "system", "content": rules},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=4000,
-            temperature=0.7
-        )
+        max_attempts = 3
+        last_error = None
+        for attempt in range(max_attempts):
+            try:
+                response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[
+                        {"role": "system", "content": rules},
+                        {"role": "user", "content": prompt + "\n\nIMPORTANT: Only output valid JSON. Do not include any explanation, markdown, or text before or after the JSON. The response must start with '{' and end with '}'."},
+                    ],
+                    max_tokens=4000,
+                    temperature=0.7
+                )
 
-        response_text = response.choices[0].message.content
-        print(f"Raw model response:\n{response_text}")
+                response_text = response.choices[0].message.content
+                print(f"Raw model response (attempt {attempt+1}):\n{response_text}")
 
-        cleaned_response = clean_json_response(response_text)
-        print(f"Cleaned response:\n{cleaned_response}")
+                cleaned_response = clean_json_response(response_text)
+                print(f"Cleaned response (attempt {attempt+1}):\n{cleaned_response}")
 
-        if not is_json_well_formed(cleaned_response):
-            raise ValueError("Model response JSON is not well-formed.")
+                if not is_json_well_formed(cleaned_response):
+                    raise ValueError("Model response JSON is not well-formed.")
 
-        parsed = json.loads(cleaned_response)
-        
-        # Validate the parsed structure
-        if "checklists" not in parsed:
-            raise ValueError("Response missing 'checklists' key")
-            
-        # Validate that checklists is a dictionary
-        if not isinstance(parsed["checklists"], dict):
-            raise ValueError("'checklists' must be a dictionary with checklist_id keys")
-            
-        # Validate each checklist has the required structure
-        for checklist_id, checklist_data in parsed["checklists"].items():
-            if not isinstance(checklist_data, dict):
-                raise ValueError(f"Checklist {checklist_id} must be a dictionary")
-            if "checklist_name" not in checklist_data:
-                raise ValueError(f"Checklist {checklist_id} missing 'checklist_name'")
-            if "check_items" not in checklist_data:
-                raise ValueError(f"Checklist {checklist_id} missing 'check_items'")
-            if not isinstance(checklist_data["check_items"], list):
-                raise ValueError(f"Checklist {checklist_id} 'check_items' must be a list")
-            
-        result = TaskAllocationResponse(
-            success=True,
-            project_id=request.project_id,
-            checklists=parsed["checklists"]
-        )
-
-        print(f"Response object content: {result.model_dump()}")
-        return result
-
+                parsed = json.loads(cleaned_response)
+                # Validate the parsed structure
+                if "checklists" not in parsed:
+                    raise ValueError("Response missing 'checklists' key")
+                if not isinstance(parsed["checklists"], dict):
+                    raise ValueError("'checklists' must be a dictionary with checklist_id keys")
+                for checklist_id, checklist_data in parsed["checklists"].items():
+                    if not isinstance(checklist_data, dict):
+                        raise ValueError(f"Checklist {checklist_id} must be a dictionary")
+                    if "checklist_name" not in checklist_data:
+                        raise ValueError(f"Checklist {checklist_id} missing 'checklist_name'")
+                    if "check_items" not in checklist_data:
+                        raise ValueError(f"Checklist {checklist_id} missing 'check_items'")
+                    if not isinstance(checklist_data["check_items"], list):
+                        raise ValueError(f"Checklist {checklist_id} 'check_items' must be a list")
+                result = TaskAllocationResponse(
+                    success=True,
+                    project_id=request.project_id,
+                    checklists=parsed["checklists"]
+                )
+                print(f"Response object content: {result.model_dump()}")
+                return result
+            except Exception as e:
+                last_error = e
+                print(f"Attempt {attempt+1} failed: {e}")
+                if attempt == max_attempts - 1:
+                    logging.error(f"All attempts failed. Last raw response: {response_text if 'response_text' in locals() else ''}")
+                    traceback.print_exc()
+                    return TaskAllocationResponse(
+                        success=False,
+                        project_id=request.project_id,
+                        checklists={},
+                        error=f"Model response JSON is not well-formed after {max_attempts} attempts. Last error: {str(last_error)}"
+                    )
     except Exception as e:
         logging.error(f"Error in task allocation: {e}")
         traceback.print_exc()
