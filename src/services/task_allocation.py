@@ -79,7 +79,8 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
         - Spread tasks fairly.
         - IMPORTANT!!! The final JSON response must use checklist_id as the key.
         - Final JSON format should be:
-        
+        - Also assign the priority level of each task based on the weight of the task, with 3 levels: p0, p1, p2. 
+        - Where p0 is the highest priority and p2 is the lowest.
           {
             "checklists": {
                 "checklist_id": {
@@ -90,7 +91,8 @@ def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
                             "check_item_name": str,
                             "due_date": str,
                             "status": str,
-                            "user_id": int
+                            "user_id": int,
+                            "priority": str
                         }
                     ]
                 }
