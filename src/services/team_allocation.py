@@ -302,7 +302,7 @@ ALLOCATION RULES:
 - Each required department must have at least one team allocated
 - These are the only teams associated with departments that handle tasks for package
 - When all teams are busy, stack projects while maintaining balanced workload
-- Only allocate 1 team per department... meaning if a department has 2 teams available, you only allocate 1, if package requires 6 departments, you allocate only 1 team per department
+- MOST IMPORTANT: Only allocate 1 team per department... meaning if a department has 2 teams available, you only allocate 1, if package requires 6 departments, you allocate only 1 team per department
 
 DEPARTMENT INFORMATION:
 - Package {team_allocation.package_id} requires departments: {package_dept_ids}
