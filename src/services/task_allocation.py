@@ -4,7 +4,7 @@ import sys
 import json
 import traceback
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from openai import OpenAI
 from src.database import SessionLocal
 from src.config import GITHUB_TOKEN, MODEL_NAME
@@ -30,12 +30,325 @@ if not os.path.exists(TASK_ALLOCATION_HISTORY):
     with open(TASK_ALLOCATION_HISTORY, "w") as f:
         json.dump([], f)
 
+MAX_TOKENS_PER_REQUEST = 4000
+ESTIMATED_TOKENS_PER_TASK = 80
+MAX_TASKS_PER_CHUNK = 30
+
+def estimate_token_count(text: str) -> int:
+    return len(text) // 3
+
+def calculate_chunk_size(users_dict: Dict[str, List[dict]], max_tokens: int) -> int:
+    users_text = json.dumps(users_dict)
+    users_tokens = estimate_token_count(users_text)
+    system_prompt_tokens = estimate_token_count(create_system_prompt())
+    
+    available_tokens = max_tokens - users_tokens - system_prompt_tokens - 1500
+    max_tasks_per_chunk = max(5, min(MAX_TASKS_PER_CHUNK, available_tokens // ESTIMATED_TOKENS_PER_TASK))
+    
+    print(f"Max tasks per chunk: {max_tasks_per_chunk}")
+    return max_tasks_per_chunk
+
+def chunk_task_data(data_array: List[CardData], chunk_size: int) -> List[List[CardData]]:
+    chunks = []
+    current_chunk = []
+    current_task_count = 0
+    
+    for card in data_array:
+        card_task_count = sum(len(checklist.check_items) for checklist in card.checklists)
+        
+        if current_task_count + card_task_count > chunk_size and current_chunk:
+            chunks.append(current_chunk)
+            current_chunk = []
+            current_task_count = 0
+        
+        current_chunk.append(card)
+        current_task_count += card_task_count
+    
+    if current_chunk:
+        chunks.append(current_chunk)
+    
+    return chunks
+
+def merge_allocation_responses(responses: List[TaskAllocationResponse]) -> Dict[str, Any]:
+    merged_checklists = {}
+    
+    for response in responses:
+        if response.success and response.checklists:
+            merged_checklists.update(response.checklists)
+    
+    return merged_checklists
+
+def process_chunk(
+    project_id: int, 
+    chunk_data: List[CardData], 
+    users_dict: Dict[str, List[dict]], 
+    chunk_index: int, 
+    total_chunks: int
+) -> TaskAllocationResponse:
+    print(f"Processing chunk {chunk_index + 1}/{total_chunks}")
+    
+    task_summary = []
+    for card in chunk_data:
+        for checklist in card.checklists:
+            for item in checklist.check_items:
+                task_summary.append({
+                    "card_id": card.card_id,
+                    "card_name": card.card_name,
+                    "card_due_date": card.card_due_date,
+                    "card_description": card.card_description,
+                    "checklist_id": checklist.checklist_id,
+                    "checklist_name": checklist.checklist_name,
+                    "check_item_id": item.check_item_id,
+                    "check_item_name": item.check_item_name,
+                    "due_date": item.due_date,
+                    "status": item.status
+                })
+    
+    system_prompt = create_system_prompt()
+    user_prompt = create_user_prompt(project_id, task_summary, users_dict)
+    
+    chunk_context = f"\n\nCHUNK INFO: Processing chunk {chunk_index + 1} of {total_chunks}."
+    user_prompt += chunk_context
+    
+    max_attempts = 3
+    last_error = None
+    
+    for attempt in range(max_attempts):
+        try:
+            print(f"Chunk {chunk_index + 1}, Attempt {attempt + 1}/{max_attempts}")
+            
+            temperature = 0.3 + (attempt * 0.1)
+            
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                    {"role": "assistant", "content": '{"checklists": {'},
+                ],
+                max_tokens=6000,
+                temperature=min(temperature, 0.7)
+            )
+
+            response_text = response.choices[0].message.content.strip()
+            
+            if not response_text.startswith('{"checklists":'):
+                if response_text.startswith('{'):
+                    response_text = '{"checklists": ' + response_text + '}'
+                else:
+                    response_text = '{"checklists": {' + response_text + '}}'
+            
+            parsed_data = validate_and_parse_json(response_text)
+            validated_data = validate_allocation_structure(parsed_data)
+
+            print(f"Chunk {chunk_index + 1} processed successfully")
+            
+            return TaskAllocationResponse(
+                success=True,
+                project_id=project_id,
+                checklists=validated_data["checklists"]
+            )
+
+        except Exception as e:
+            last_error = e
+            print(f"Chunk {chunk_index + 1}, Attempt {attempt + 1} failed: {str(e)}")
+    
+    print(f"Chunk {chunk_index + 1} failed all attempts, creating fallback")
+    
+    chunk_request = TaskAllocationRequest(
+        project_id=project_id,
+        data_array=chunk_data,
+        users={dept: [UserData(**user) for user in users] for dept, users in users_dict.items()}
+    )
+    
+    fallback_response = create_fallback_allocation(chunk_request)
+    if fallback_response:
+        return fallback_response
+    
+    return TaskAllocationResponse(
+        success=False,
+        project_id=project_id,
+        checklists={},
+        error=f"Chunk {chunk_index + 1} failed: {str(last_error)}"
+    )
+
+def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
+    try:
+        project_id = request.project_id
+        data_array = request.data_array
+        users_by_department = request.users
+
+        users_dict = {
+            dept: [user.model_dump() for user in user_list]
+            for dept, user_list in users_by_department.items()
+        }
+
+        total_tasks = sum(
+            sum(len(checklist.check_items) for checklist in card.checklists)
+            for card in data_array
+        )
+        
+        print(f"Total tasks to allocate: {total_tasks}")
+        
+        chunk_size = calculate_chunk_size(users_dict, MAX_TOKENS_PER_REQUEST)
+        
+        if total_tasks <= chunk_size:
+            print("Attempting single request")
+            single_response = allocate_tasks_single(request)
+            if single_response.success:
+                return single_response
+            print("Single request failed, falling back to chunking")
+        
+        print(f"Chunking into groups of {chunk_size} tasks")
+        
+        data_chunks = chunk_task_data(data_array, chunk_size)
+        print(f"Created {len(data_chunks)} chunks")
+        
+        chunk_responses = []
+        failed_chunks = []
+        
+        for i, chunk_data in enumerate(data_chunks):
+            chunk_response = process_chunk(project_id, chunk_data, users_dict, i, len(data_chunks))
+            
+            if chunk_response.success:
+                chunk_responses.append(chunk_response)
+            else:
+                failed_chunks.append(i + 1)
+                print(f"Chunk {i + 1} failed: {chunk_response.error}")
+        
+        if chunk_responses:
+            merged_checklists = merge_allocation_responses(chunk_responses)
+            
+            success_message = f"Successfully processed {len(chunk_responses)}/{len(data_chunks)} chunks"
+            if failed_chunks:
+                success_message += f". Failed chunks: {failed_chunks}"
+            
+            return TaskAllocationResponse(
+                success=True,
+                project_id=project_id,
+                checklists=merged_checklists,
+                error=success_message if failed_chunks else None
+            )
+        else:
+            print("All chunks failed, creating complete fallback allocation")
+            fallback_response = create_fallback_allocation(request)
+            if fallback_response:
+                fallback_response.error = "All AI allocation attempts failed, using fallback allocation"
+                return fallback_response
+            
+            return TaskAllocationResponse(
+                success=False,
+                project_id=project_id,
+                checklists={},
+                error=f"All {len(data_chunks)} chunks failed processing"
+            )
+
+    except Exception as e:
+        logging.error(f"Critical error in task allocation: {e}")
+        traceback.print_exc()
+        return TaskAllocationResponse(
+            success=False,
+            project_id=request.project_id,
+            checklists={},
+            error=f"Critical system error: {str(e)}"
+        )
+
+def allocate_tasks_single(request: TaskAllocationRequest) -> TaskAllocationResponse:
+    try:
+        project_id = request.project_id
+        data_array = request.data_array
+        users_by_department = request.users
+
+        task_summary = []
+        for card in data_array:
+            for checklist in card.checklists:
+                for item in checklist.check_items:
+                    task_summary.append({
+                        "card_id": card.card_id,
+                        "card_name": card.card_name,
+                        "card_due_date": card.card_due_date,
+                        "card_description": card.card_description,
+                        "checklist_id": checklist.checklist_id,
+                        "checklist_name": checklist.checklist_name,
+                        "check_item_id": item.check_item_id,
+                        "check_item_name": item.check_item_name,
+                        "due_date": item.due_date,
+                        "status": item.status
+                    })
+
+        users_dict = {
+            dept: [user.model_dump() for user in user_list]
+            for dept, user_list in users_by_department.items()
+        }
+
+        system_prompt = create_system_prompt()
+        user_prompt = create_user_prompt(project_id, task_summary, users_dict)
+
+        max_attempts = 2
+        last_error = None
+
+        for attempt in range(max_attempts):
+            try:
+                print(f"Single request attempt {attempt + 1}/{max_attempts}")
+                
+                temperature = 0.3 + (attempt * 0.1)
+                
+                response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                        {"role": "assistant", "content": '{"checklists": {'},
+                    ],
+                    max_tokens=6000,
+                    temperature=min(temperature, 0.7)
+                )
+
+                response_text = response.choices[0].message.content.strip()
+                
+                if not response_text.startswith('{"checklists":'):
+                    if response_text.startswith('{'):
+                        response_text = '{"checklists": ' + response_text + '}'
+                    else:
+                        response_text = '{"checklists": {' + response_text + '}}'
+                
+                parsed_data = validate_and_parse_json(response_text)
+                validated_data = validate_allocation_structure(parsed_data)
+
+                print(f"Successfully processed single request on attempt {attempt + 1}")
+                
+                return TaskAllocationResponse(
+                    success=True,
+                    project_id=request.project_id,
+                    checklists=validated_data["checklists"]
+                )
+
+            except Exception as e:
+                last_error = e
+                print(f"Single request attempt {attempt + 1} failed: {str(e)}")
+
+        print("Single request failed all attempts")
+        return TaskAllocationResponse(
+            success=False,
+            project_id=request.project_id,
+            checklists={},
+            error=f"Single request failed: {str(last_error)}"
+        )
+
+    except Exception as e:
+        logging.error(f"Critical error in single task allocation: {e}")
+        traceback.print_exc()
+        return TaskAllocationResponse(
+            success=False,
+            project_id=request.project_id,
+            checklists={},
+            error=f"Critical system error: {str(e)}"
+        )
+
 def extract_json_from_text(text: str) -> str:
-    """Enhanced JSON extraction with multiple strategies"""
     if not text or not text.strip():
         raise ValueError("Empty response text")
     
-    # Strategy 1: Find complete JSON object
     brace_count = 0
     start_pos = -1
     
@@ -49,7 +362,6 @@ def extract_json_from_text(text: str) -> str:
             if brace_count == 0 and start_pos != -1:
                 return text[start_pos:i+1]
     
-    # Strategy 2: Find between first { and last }
     start = text.find('{')
     end = text.rfind('}')
     if start != -1 and end != -1 and end > start:
@@ -60,7 +372,6 @@ def extract_json_from_text(text: str) -> str:
         except:
             pass
     
-    # Strategy 3: Look for JSON code blocks
     patterns = [
         r'```json\s*(\{.*?\})\s*```',
         r'```\s*(\{.*?\})\s*```',
@@ -76,7 +387,6 @@ def extract_json_from_text(text: str) -> str:
             except:
                 continue
     
-    # Strategy 4: Clean common formatting issues
     cleaned = text.strip()
     if cleaned.startswith('```json'):
         cleaned = cleaned[7:]
@@ -93,76 +403,56 @@ def extract_json_from_text(text: str) -> str:
     raise ValueError("No valid JSON found in response")
 
 def fix_json_formatting(json_str: str) -> str:
-    """Fix common JSON formatting issues"""
-    # Remove trailing commas
     json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
-    
-    # Fix unescaped quotes in strings
     json_str = re.sub(r'(?<!\\)"(?=.*".*:)', r'\\"', json_str)
-    
-    # Ensure proper string quoting for keys
     json_str = re.sub(r'(\w+):', r'"\1":', json_str)
-    
-    # Fix already quoted keys (avoid double quotes)
     json_str = re.sub(r'""(\w+)"":', r'"\1":', json_str)
-    
     return json_str
 
 def validate_and_parse_json(text: str) -> dict:
-    """Robust JSON parsing with multiple attempts"""
     original_text = text
     
-    # Try direct parsing first
     try:
         return json.loads(text)
     except json.JSONDecodeError:
         pass
     
-    # Extract JSON from text
     try:
         json_str = extract_json_from_text(text)
     except ValueError as e:
         raise ValueError(f"Could not extract JSON: {e}")
     
-    # Try parsing extracted JSON
     try:
         return json.loads(json_str)
     except json.JSONDecodeError:
         pass
     
-    # Try fixing formatting issues
     try:
         fixed_json = fix_json_formatting(json_str)
         return json.loads(fixed_json)
     except json.JSONDecodeError:
         pass
     
-    # Last resort: try to repair JSON structure
     try:
         return repair_json_structure(json_str)
     except Exception:
         raise ValueError(f"Could not parse JSON after all attempts. Original: {original_text[:200]}...")
 
 def repair_json_structure(json_str: str) -> dict:
-    """Attempt to repair malformed JSON structure"""
-    # Remove any text before first {
     start = json_str.find('{')
     if start > 0:
         json_str = json_str[start:]
     
-    # Remove any text after last }
     end = json_str.rfind('}')
     if end != -1:
         json_str = json_str[:end+1]
     
-    # Try to balance braces
     open_braces = json_str.count('{')
     close_braces = json_str.count('}')
     
     if open_braces > close_braces:
         json_str += '}' * (open_braces - close_braces)
     elif close_braces > open_braces:
-        # Remove extra closing braces from the end
         diff = close_braces - open_braces
         for _ in range(diff):
             last_brace = json_str.rfind('}')
@@ -172,13 +462,10 @@ def repair_json_structure(json_str: str) -> dict:
     return json.loads(json_str)
 
 def validate_allocation_structure(data: dict) -> dict:
-    """Validate and fix the allocation response structure"""
     if not isinstance(data, dict):
         raise ValueError("Response must be a dictionary")
     
-    # Auto-fix: If the response is missing the "checklists" wrapper but contains checklist data
     if "checklists" not in data:
-        # Check if the root object contains checklist-like data
         if all(isinstance(v, dict) and "checklist_name" in v and "check_items" in v for v in data.values()):
             print("Auto-fixing: Adding missing 'checklists' wrapper")
             data = {"checklists": data}
@@ -193,7 +480,6 @@ def validate_allocation_structure(data: dict) -> dict:
         if not isinstance(checklist_data, dict):
             raise ValueError(f"Checklist {checklist_id} must be a dictionary")
         
-        # Ensure required fields exist
         if "checklist_name" not in checklist_data:
             checklist_data["checklist_name"] = f"Checklist {checklist_id}"
         
@@ -203,12 +489,10 @@ def validate_allocation_structure(data: dict) -> dict:
         if not isinstance(checklist_data["check_items"], list):
             raise ValueError(f"Checklist {checklist_id} 'check_items' must be a list")
         
-        # Validate each check item
         for i, item in enumerate(checklist_data["check_items"]):
             if not isinstance(item, dict):
                 raise ValueError(f"Check item {i} in checklist {checklist_id} must be a dictionary")
             
-            # Ensure required fields
             required_fields = ["check_item_id", "check_item_name", "due_date", "status", "user_id", "priority"]
             for field in required_fields:
                 if field not in item:
@@ -217,14 +501,13 @@ def validate_allocation_structure(data: dict) -> dict:
                     elif field == "priority":
                         item[field] = "p1"
                     elif field == "user_id":
-                        item[field] = 0  # Will need to be assigned
+                        item[field] = 0
                     else:
                         item[field] = f"default_{field}"
     
     return data
 
 def create_system_prompt() -> str:
-    """Create a comprehensive system prompt"""
     return """You are a task allocation AI. Your job is to assign tasks to users based on their skills and department.
 
 CRITICAL RULES:
@@ -267,7 +550,6 @@ EXAMPLE STRUCTURE:
 {"checklists": {"abc123": {"checklist_name": "Test", "check_items": [{"check_item_id": "xyz", "check_item_name": "Task", "due_date": "2024-01-01", "status": "incomplete", "user_id": 123, "priority": "p1"}]}}}"""
 
 def create_user_prompt(project_id: int, task_summary: List[dict], users_dict: Dict[str, List[dict]]) -> str:
-    """Create the user prompt with data"""
     return f"""Project ID: {project_id}
 
 TASKS TO ALLOCATE:
@@ -288,135 +570,12 @@ Assign each task to the most suitable user from the correct department based on 
 
 Remember: The response MUST start with {{"checklists": and contain all checklist IDs as keys within the checklists object."""
 
-def allocate_tasks(request: TaskAllocationRequest) -> TaskAllocationResponse:
-    """Main task allocation function with enhanced error handling"""
-    try:
-        project_id = request.project_id
-        data_array = request.data_array
-        users_by_department = request.users
-
-        # Build task summary
-        task_summary = []
-        for card in data_array:
-            for checklist in card.checklists:
-                for item in checklist.check_items:
-                    task_summary.append({
-                        "card_id": card.card_id,
-                        "card_name": card.card_name,
-                        "card_due_date": card.card_due_date,
-                        "card_description": card.card_description,
-                        "checklist_id": checklist.checklist_id,
-                        "checklist_name": checklist.checklist_name,
-                        "check_item_id": item.check_item_id,
-                        "check_item_name": item.check_item_name,
-                        "due_date": item.due_date,
-                        "status": item.status
-                    })
-
-        # Convert users to dict format
-        users_dict = {
-            dept: [user.model_dump() for user in user_list]
-            for dept, user_list in users_by_department.items()
-        }
-
-        system_prompt = create_system_prompt()
-        user_prompt = create_user_prompt(project_id, task_summary, users_dict)
-
-        max_attempts = 5  # Increased attempts
-        last_error = None
-        raw_responses = []
-
-        for attempt in range(max_attempts):
-            try:
-                print(f"Attempt {attempt + 1}/{max_attempts}")
-                
-                # Adjust temperature based on attempt (start conservative)
-                temperature = 0.3 + (attempt * 0.1)
-                
-                response = client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                        {"role": "assistant", "content": '{"checklists": {'},
-                    ],
-                    max_tokens=4000,
-                    temperature=min(temperature, 0.7)
-                )
-
-                response_text = response.choices[0].message.content.strip()
-                
-                # Auto-fix: If the response doesn't start with the expected format, prepend it
-                if not response_text.startswith('{"checklists":'):
-                    if response_text.startswith('{'):
-                        # The model started with a checklist ID directly
-                        response_text = '{"checklists": ' + response_text + '}'
-                        print("Auto-fixed: Added checklists wrapper to response")
-                    else:
-                        response_text = '{"checklists": {' + response_text + '}}'
-                        print("Auto-fixed: Added complete checklists wrapper")
-                
-                raw_responses.append(response_text)
-                
-                print(f"Raw response length: {len(response_text)}")
-                print(f"Raw response preview: {response_text[:200]}...")
-
-                # Parse and validate JSON
-                parsed_data = validate_and_parse_json(response_text)
-                validated_data = validate_allocation_structure(parsed_data)
-
-                print(f"Successfully parsed and validated response on attempt {attempt + 1}")
-                
-                return TaskAllocationResponse(
-                    success=True,
-                    project_id=request.project_id,
-                    checklists=validated_data["checklists"]
-                )
-
-            except Exception as e:
-                last_error = e
-                print(f"Attempt {attempt + 1} failed: {str(e)}")
-                
-                # Log the specific error type
-                if "JSON" in str(e).upper():
-                    print(f"JSON parsing error on attempt {attempt + 1}")
-                elif "validation" in str(e).lower():
-                    print(f"Validation error on attempt {attempt + 1}")
-                else:
-                    print(f"Other error on attempt {attempt + 1}: {type(e).__name__}")
-
-        # All attempts failed - create fallback response
-        print(f"All {max_attempts} attempts failed. Creating fallback response.")
-        fallback_response = create_fallback_allocation(request)
-        if fallback_response:
-            return fallback_response
-
-        # Last resort error response
-        return TaskAllocationResponse(
-            success=False,
-            project_id=request.project_id,
-            checklists={},
-            error=f"Failed after {max_attempts} attempts. Last error: {str(last_error)}. Raw responses available for debugging."
-        )
-
-    except Exception as e:
-        logging.error(f"Critical error in task allocation: {e}")
-        traceback.print_exc()
-        return TaskAllocationResponse(
-            success=False,
-            project_id=request.project_id,
-            checklists={},
-            error=f"Critical system error: {str(e)}"
-        )
-
 def create_fallback_allocation(request: TaskAllocationRequest) -> Optional[TaskAllocationResponse]:
-    """Create a basic fallback allocation when AI fails"""
     try:
         print("Creating fallback allocation...")
         
         checklists = {}
         
-        # Get all users flattened
         all_users = []
         for dept, users in request.users.items():
             all_users.extend(users)
@@ -434,7 +593,6 @@ def create_fallback_allocation(request: TaskAllocationRequest) -> Optional[TaskA
                 }
                 
                 for item in checklist.check_items:
-                    # Round-robin assignment
                     assigned_user = all_users[user_index % len(all_users)]
                     user_index += 1
                     
@@ -444,7 +602,7 @@ def create_fallback_allocation(request: TaskAllocationRequest) -> Optional[TaskA
                         "due_date": item.due_date,
                         "status": item.status,
                         "user_id": assigned_user.user_id,
-                        "priority": "p1"  # Default priority
+                        "priority": "p1"
                     }
                     
                     checklist_data["check_items"].append(check_item_data)
@@ -463,7 +621,6 @@ def create_fallback_allocation(request: TaskAllocationRequest) -> Optional[TaskA
         print(f"Fallback allocation failed: {e}")
         return None
 
-# Test code remains the same
 if __name__ == "__main__":
     from pydantic import BaseModel
     import uuid
